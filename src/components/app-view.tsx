@@ -1,0 +1,11 @@
+import { View, type ViewProps } from 'react-native';
+
+import { cn } from '@/lib/utils';
+
+export type AppViewProps = ViewProps & {
+  className?: string;
+};
+
+export function ThemedView({ className, ...otherProps }: AppViewProps) {
+  return <View className={cn('bg-white dark:bg-neutral-950', className)} {...otherProps} />;
+}
