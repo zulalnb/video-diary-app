@@ -6,7 +6,8 @@ export type SavedVideoDraft = {
   id: string;
   uri: string;
   name: string;
-  description: string;
+  thumbnail: string;
+  description?: string;
   startTime: number;
   endTime: number;
   createdAt: string;

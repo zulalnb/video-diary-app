@@ -1,16 +1,17 @@
 import { router } from 'expo-router';
+import * as VideoThumbnails from 'expo-video-thumbnails';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
-
 import { MetadataStep } from '@/components/video-flow/metadata-step';
 import { SelectVideoStep } from '@/components/video-flow/select-video-step';
 import { TrimVideoStep } from '@/components/video-flow/trim-video-step';
-import { CLIP_DURATION, STEPS, Step } from '@/constants/video-flow';
+import { STEPS, Step } from '@/constants/video-flow';
+import { useCreateVideo } from '@/hooks/use-videos';
 import type { VideoMetadataFormValues } from '@/schemas/metadata';
-import type { PickedVideoAsset, SavedVideoDraft } from '@/types/video';
+import type { PickedVideoAsset } from '@/types/video';
 
 export default function ModalScreen() {
   const insets = useSafeAreaInsets();
@@ -20,7 +21,8 @@ export default function ModalScreen() {
   const [startTime, setStartTime] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
 
-  const endTime = startTime + CLIP_DURATION;
+  // const trimVideoMutation = useTrimVideo();
+  const createVideo = useCreateVideo();
 
   const handleSelectVideo = (selectedVideo: PickedVideoAsset) => {
     setVideo(selectedVideo);
@@ -52,26 +54,50 @@ export default function ModalScreen() {
     router.dismissTo('/');
   };
 
+  const generateThumbnail = async (video: string) => {
+    try {
+      const { uri } = await VideoThumbnails.getThumbnailAsync(video, {
+        time: 1000,
+      });
+      return uri;
+    } catch (e) {
+      console.warn(e);
+    }
+  };
+
   const handleSave = async (values: VideoMetadataFormValues) => {
     if (!video) return;
 
     setIsSaving(true);
 
-    const payload: SavedVideoDraft = {
-      id: Date.now().toString(),
-      uri: video.uri,
-      name: values.name,
-      description: values.description ?? '',
-      startTime,
-      endTime,
-      createdAt: new Date().toISOString(),
-    };
+    try {
+      /* const trimmed = await trimVideoMutation.mutateAsync({
+        uri: video.uri,
+        start: startTime,
+        end: startTime + CLIP_DURATION,
+      }); */
 
-    console.log('mock saved video:', payload);
+      const thumbnail = await generateThumbnail(video.uri);
 
-    setIsSaving(false);
+      const payload = {
+        uri: video.uri,
+        thumbnail: thumbnail ?? '',
+        name: values.name,
+        description: values.description ?? '',
+      };
 
-    router.dismissTo('/');
+      createVideo.mutate(payload, {
+        onSuccess: () => {
+          router.dismissTo('/');
+        },
+        onSettled() {
+          setIsSaving(false);
+        },
+      });
+    } catch (error) {
+      console.error('Video save failed:', error);
+      setIsSaving(false);
+    }
   };
 
   return (
