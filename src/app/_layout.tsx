@@ -4,15 +4,19 @@ import 'react-native-reanimated';
 
 import '@/global.css';
 import '@/lib/nativewind';
+import QueryProvider from '@/providers/query-provider';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function RootLayout() {
   return (
-    <>
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </>
+    <GestureHandlerRootView>
+      <QueryProvider>
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="modal" options={{ presentation: 'modal', headerShown: false }} />
+        </Stack>
+        <StatusBar style="dark" />
+      </QueryProvider>
+    </GestureHandlerRootView>
   );
 }

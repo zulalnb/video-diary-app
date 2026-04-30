@@ -1,17 +1,21 @@
-import { Text, TouchableOpacity, View } from 'react-native';
+import { AppText } from '@/components/app-text';
+import { Button } from '@/components/ui/button';
+import { Link } from 'expo-router';
+import { View } from 'react-native';
 
 export default function HomeScreen() {
   return (
     <View className="flex-1 items-center justify-center px-6">
-      <Text className="mb-2 text-xl font-semibold">No videos yet</Text>
-
-      <Text className="mb-6 text-center text-gray-500">
+      <AppText type="title" className="mb-2 text-center">
+        No videos yet
+      </AppText>
+      <AppText className="mb-4 text-center">
         Add your first video to start creating memories.
-      </Text>
+      </AppText>
 
-      <TouchableOpacity className="rounded-xl bg-indigo-500 px-6 py-3">
-        <Text className="font-medium text-white">Add Video</Text>
-      </TouchableOpacity>
+      <Link href="/modal" asChild>
+        <Button title="Add Video" />
+      </Link>
     </View>
   );
 }

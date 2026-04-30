@@ -6,7 +6,7 @@ import Animated, {
   useScrollOffset,
 } from 'react-native-reanimated';
 
-import { ThemedView } from '@/components/app-view';
+import { AppView } from '@/components/app-view';
 
 const HEADER_HEIGHT = 250;
 
@@ -52,7 +52,7 @@ export default function ParallaxScrollView({
           {headerImage}
         </Animated.View>
       )}
-      <ThemedView className="flex-1 gap-4 overflow-hidden p-8">{children}</ThemedView>
+      <AppView className="flex-1 gap-4 overflow-hidden p-8">{children}</AppView>
     </Animated.ScrollView>
   );
 }
