@@ -1,32 +1,77 @@
-import { router } from 'expo-router';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { router, useNavigation } from 'expo-router';
 import * as VideoThumbnails from 'expo-video-thumbnails';
-import { useState } from 'react';
-import { View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useEffect, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { Alert, Keyboard, Platform, TouchableWithoutFeedback, View } from 'react-native';
+import { KeyboardAvoidingView, KeyboardEvents } from 'react-native-keyboard-controller';
+
+import { STEPS, Step } from '@/constants/video-flow';
+import { useCreateVideo } from '@/hooks/use-videos';
+import { videoMetadataSchema, type VideoMetadataFormValues } from '@/schemas/metadata';
+import type { PickedVideoAsset } from '@/types/video';
 
 import { Button } from '@/components/ui/button';
 import { MetadataStep } from '@/components/video-flow/metadata-step';
 import { SelectVideoStep } from '@/components/video-flow/select-video-step';
 import { TrimVideoStep } from '@/components/video-flow/trim-video-step';
-import { STEPS, Step } from '@/constants/video-flow';
-import { useCreateVideo } from '@/hooks/use-videos';
-import type { VideoMetadataFormValues } from '@/schemas/metadata';
-import type { PickedVideoAsset } from '@/types/video';
+import { usePreventRemove } from '@react-navigation/native';
 
 export default function ModalScreen() {
-  const insets = useSafeAreaInsets();
-
   const [step, setStep] = useState<Step>(STEPS.SELECT);
   const [video, setVideo] = useState<PickedVideoAsset | null>(null);
   const [startTime, setStartTime] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
+  const [keyboardShown, setKeyboardShown] = useState(false);
 
   // const trimVideoMutation = useTrimVideo();
   const createVideo = useCreateVideo();
 
-  const handleSelectVideo = (selectedVideo: PickedVideoAsset) => {
+  const form = useForm<VideoMetadataFormValues>({
+    resolver: zodResolver(videoMetadataSchema),
+    defaultValues: {
+      name: '',
+      description: '',
+    },
+  });
+
+  const navigation = useNavigation();
+
+  const shouldPreventClose = form.formState.isDirty && !isSaving;
+
+  usePreventRemove(shouldPreventClose, ({ data }) => {
+    Alert.alert('Discard changes?', 'Your video details will be lost.', [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Discard',
+        style: 'destructive',
+        onPress: () => navigation.dispatch(data.action),
+      },
+    ]);
+  });
+
+  useEffect(() => {
+    const showSubscription = KeyboardEvents.addListener('keyboardWillShow', () => {
+      setKeyboardShown(true);
+    });
+
+    const hideSubscription = KeyboardEvents.addListener('keyboardWillHide', () => {
+      setKeyboardShown(false);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
+  const handleSelectVideo = (selectedVideo: PickedVideoAsset | null) => {
     setVideo(selectedVideo);
     setStartTime(0);
+    form.reset();
   };
 
   const handleNext = () => {
@@ -101,26 +146,55 @@ export default function ModalScreen() {
   };
 
   return (
-    <View className="flex-1 px-5" style={{ paddingBottom: Math.max(insets.bottom, 16) }}>
-      {step === STEPS.SELECT && <SelectVideoStep video={video} onSelectVideo={handleSelectVideo} />}
-      {step === STEPS.TRIM && video && (
-        <TrimVideoStep video={video} startTime={startTime} onChangeStartTime={setStartTime} />
-      )}
-      {step === STEPS.METADATA && video && (
-        <MetadataStep
-          video={video}
-          startTime={startTime}
-          isSubmitting={isSaving}
-          onSubmit={handleSave}
-        />
-      )}
+    <FormProvider {...form}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} className="flex-1">
+        <KeyboardAvoidingView
+          className="py-safe flex-1 px-5"
+          behavior={'padding'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 50 : -40}>
+          <View className="flex-1">
+            {step === STEPS.SELECT && (
+              <SelectVideoStep video={video} onSelectVideo={handleSelectVideo} />
+            )}
+            {step === STEPS.TRIM && video && (
+              <TrimVideoStep video={video} startTime={startTime} onChangeStartTime={setStartTime} />
+            )}
+            {step === STEPS.METADATA && video && (
+              <MetadataStep
+                video={video}
+                startTime={startTime}
+                isSubmitting={isSaving}
+                onSubmit={form.handleSubmit(handleSave)}
+              />
+            )}
+          </View>
+          <View className="w-full pb-12">
+            <View className="flex-row gap-8">
+              {!keyboardShown && (
+                <Button
+                  title="Back"
+                  variant="secondary"
+                  disabled={isSaving}
+                  onPress={handleBack}
+                  className="flex-1"
+                />
+              )}
 
-      <View className="w-full flex-row items-center justify-between">
-        <Button title="Back" variant="secondary" onPress={handleBack} />
-
-        {step !== STEPS.METADATA && <Button title="Next" disabled={!video} onPress={handleNext} />}
-      </View>
-    </View>
+              {step === STEPS.METADATA ? (
+                <Button
+                  title={isSaving ? 'Saving...' : 'Save'}
+                  loading={isSaving}
+                  disabled={isSaving}
+                  onPress={form.handleSubmit(handleSave)}
+                  className="flex-1"
+                />
+              ) : (
+                <Button title="Next" disabled={!video} onPress={handleNext} className="flex-1" />
+              )}
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
+    </FormProvider>
   );
 }
-7;

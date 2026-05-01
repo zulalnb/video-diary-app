@@ -1,9 +1,8 @@
 import { cn } from '@/lib/utils';
 import { TextInput, TextInputProps } from 'react-native';
-import colors from 'tailwindcss/colors';
 
 type TextareaProps = TextInputProps & {
-  error?: string;
+  error?: boolean;
 };
 
 export function Textarea({ className, error, ...props }: TextareaProps) {
@@ -18,7 +17,7 @@ export function Textarea({ className, error, ...props }: TextareaProps) {
         error && 'border-red-500',
         className
       )}
-      placeholderTextColor={colors.gray[400]}
+      placeholderClassName="text-gray-400"
     />
   );
 }

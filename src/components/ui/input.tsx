@@ -1,10 +1,9 @@
 import { TextInput, TextInputProps } from 'react-native';
 
 import { cn } from '@/lib/utils';
-import colors from 'tailwindcss/colors';
 
 type InputProps = TextInputProps & {
-  error?: string;
+  error?: boolean;
 };
 
 export function Input({ className, error, ...props }: InputProps) {
@@ -17,7 +16,7 @@ export function Input({ className, error, ...props }: InputProps) {
         error && 'border-red-500',
         className
       )}
-      placeholderTextColor={colors.gray[400]}
+      placeholderClassName="text-gray-400"
     />
   );
 }

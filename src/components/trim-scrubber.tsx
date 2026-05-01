@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { LayoutChangeEvent, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
@@ -25,30 +25,33 @@ export function TrimScrubber({
   const trackWidth = useSharedValue(0);
   const rangeWidth = useSharedValue(0);
   const translateX = useSharedValue(0);
-  const startX = useSharedValue(0);
+  const startX = useSharedValue(startTime);
 
   const maxStartTime = Math.max(duration - clipDuration, 0);
   const endTime = startTime + clipDuration;
 
-  const syncRangeWithTime = () => {
-    const maxX = trackWidth.value - rangeWidth.value;
+  const getTranslateXFromStartTime = useCallback(
+    (width: number, selectedWidth: number) => {
+      const maxX = width - selectedWidth;
 
-    if (!trackWidth.value || maxX <= 0 || !maxStartTime) return;
+      if (!width || maxX <= 0 || !maxStartTime) return 0;
 
-    translateX.value = (startTime / maxStartTime) * maxX;
-  };
+      return Math.min(Math.max((startTime / maxStartTime) * maxX, 0), maxX);
+    },
+    [maxStartTime, startTime]
+  );
 
   useEffect(() => {
-    syncRangeWithTime();
-  }, [startTime, maxStartTime]);
+    translateX.value = getTranslateXFromStartTime(trackWidth.value, rangeWidth.value);
+  }, [getTranslateXFromStartTime, maxStartTime, startTime, trackWidth, rangeWidth, translateX]);
 
   const handleLayout = (event: LayoutChangeEvent) => {
     const width = event.nativeEvent.layout.width;
+    const selectedWidth = duration > 0 ? (clipDuration / duration) * width : 0;
 
     trackWidth.value = width;
-    rangeWidth.value = duration > 0 ? (clipDuration / duration) * width : 0;
-
-    syncRangeWithTime();
+    rangeWidth.value = selectedWidth;
+    translateX.value = getTranslateXFromStartTime(width, selectedWidth);
   };
 
   const panGesture = Gesture.Pan()
@@ -57,12 +60,13 @@ export function TrimScrubber({
     })
     .onUpdate((event) => {
       const maxX = Math.max(trackWidth.value - rangeWidth.value, 0);
-
       const nextX = Math.min(Math.max(startX.value + event.translationX, 0), maxX);
 
       translateX.value = nextX;
-
-      const nextStartTime = maxX > 0 ? (nextX / maxX) * maxStartTime : 0;
+    })
+    .onEnd(() => {
+      const maxX = Math.max(trackWidth.value - rangeWidth.value, 0);
+      const nextStartTime = maxX > 0 ? (translateX.value / maxX) * maxStartTime : 0;
 
       scheduleOnRN(onChange, Number(nextStartTime.toFixed(1)));
     });
@@ -73,7 +77,11 @@ export function TrimScrubber({
   }));
 
   return (
-    <View className="mt-6 w-full px-5">
+    <View className="mt-8 w-full px-5">
+      <AppText className="mb-6 text-center text-sm text-gray-500">
+        Drag to select a 5-second segment.
+      </AppText>
+
       <View className="mb-3 flex-row items-center justify-between">
         <AppText className="text-sm text-gray-500">Start: {startTime.toFixed(1)}s</AppText>
         <AppText className="text-sm text-gray-500">End: {endTime.toFixed(1)}s</AppText>
@@ -99,10 +107,6 @@ export function TrimScrubber({
           />
         </GestureDetector>
       </View>
-
-      <AppText className="mt-2 text-center text-sm text-gray-500">
-        Drag to select a 5-second segment.
-      </AppText>
     </View>
   );
 }

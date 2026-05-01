@@ -4,7 +4,7 @@ import colors from 'tailwindcss/colors';
 
 type ButtonProps = {
   title: string;
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'destructive';
   loading?: boolean;
 } & TouchableOpacityProps;
 
@@ -17,7 +17,7 @@ export function Button({
   ...props
 }: ButtonProps) {
   const isDisabled = disabled || loading;
-  const textStyle = variant === 'primary' ? 'text-white' : 'text-gray-800';
+  const textStyle = variant !== 'secondary' ? 'text-white' : 'text-gray-800';
 
   return (
     <TouchableOpacity
@@ -27,6 +27,7 @@ export function Button({
         'items-center justify-center rounded-xl px-5 py-3',
         variant === 'primary' && 'bg-indigo-500',
         variant === 'secondary' && 'bg-gray-200',
+        variant === 'destructive' && 'bg-red-500',
         isDisabled && 'opacity-50',
         className
       )}

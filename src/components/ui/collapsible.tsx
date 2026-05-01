@@ -1,8 +1,8 @@
 import { PropsWithChildren, useState } from 'react';
 import { TouchableOpacity } from 'react-native';
 
-import { ThemedText } from '@/components/app-text';
-import { ThemedView } from '@/components/app-view';
+import { AppText } from '@/components/app-text';
+import { AppView } from '@/components/app-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import colors from 'tailwindcss/colors';
 
@@ -11,7 +11,7 @@ export function Collapsible({ children, title }: PropsWithChildren & { title: st
   const theme = 'light';
 
   return (
-    <ThemedView>
+    <AppView>
       <TouchableOpacity
         className="flex-row items-center gap-1.5"
         onPress={() => setIsOpen((value) => !value)}
@@ -24,9 +24,9 @@ export function Collapsible({ children, title }: PropsWithChildren & { title: st
           style={{ transform: [{ rotate: isOpen ? '90deg' : '0deg' }] }}
         />
 
-        <ThemedText type="defaultSemiBold">{title}</ThemedText>
+        <AppText type="defaultSemiBold">{title}</AppText>
       </TouchableOpacity>
-      {isOpen && <ThemedView className="ml-6 mt-1.5">{children}</ThemedView>}
-    </ThemedView>
+      {isOpen && <AppView className="ml-6 mt-1.5">{children}</AppView>}
+    </AppView>
   );
 }

@@ -1,15 +1,17 @@
 import * as ImagePicker from 'expo-image-picker';
-import { Alert, View } from 'react-native';
+import { Alert, Pressable, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { PickedVideo } from '@/components/picked-video';
 import { Button } from '@/components/ui/button';
 import { CLIP_DURATION } from '@/constants/video-flow';
 import type { PickedVideoAsset } from '@/types/video';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import colors from 'tailwindcss/colors';
 
 type SelectVideoStepProps = {
   video: PickedVideoAsset | null;
-  onSelectVideo: (video: PickedVideoAsset) => void;
+  onSelectVideo: (video: PickedVideoAsset | null) => void;
 };
 
 export function SelectVideoStep({ video, onSelectVideo }: SelectVideoStepProps) {
@@ -40,22 +42,43 @@ export function SelectVideoStep({ video, onSelectVideo }: SelectVideoStepProps) 
   };
 
   return (
-    <View className="flex-1 items-center justify-center">
+    <View className="flex-1">
+      <AppText type="title" className="mb-10 text-center">
+        Select a Video
+      </AppText>
       {video ? (
-        <PickedVideo uri={video.uri} />
+        <View>
+          <PickedVideo uri={video.uri} />
+          <View className="mt-4 flex-row gap-4">
+            <Button
+              title="Change"
+              variant="secondary"
+              onPress={pickVideo}
+              className="mt-5 flex-1"
+            />
+            <Button
+              title="Remove"
+              variant="destructive"
+              onPress={() => onSelectVideo(null)}
+              className="mt-5 flex-1"
+            />
+          </View>
+        </View>
       ) : (
-        <>
-          <AppText type="title" className="mb-2 text-center">
-            Select a video
-          </AppText>
-
-          <AppText className="mb-4 text-center">
-            Choose a video from your device to create a 5-second diary clip.
-          </AppText>
-        </>
+        <Pressable onPress={pickVideo}>
+          <View className="aspect-video items-center rounded-xl border border-dashed border-gray-400 px-5 py-14">
+            <MaterialIcons
+              name="video-library"
+              size={48}
+              color={colors.gray[400]}
+              className="mb-4"
+            />
+            <AppText className="mb-4 text-center text-gray-400">
+              Choose a video from your device to create a 5-second diary clip.
+            </AppText>
+          </View>
+        </Pressable>
       )}
-
-      <Button title="Choose a video" onPress={pickVideo} />
     </View>
   );
 }

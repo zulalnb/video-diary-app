@@ -67,10 +67,6 @@ export function useUpdateVideo() {
 /* export function useTrimVideo() {
   return useMutation({
     mutationFn: ({ uri, start, end }: { uri: string; start: number; end: number }) =>
-      trimVideo({
-        uri,
-        start,
-        end,
-      }),
+      trimVideo({ uri, start, end }),
   });
 } */

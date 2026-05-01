@@ -5,11 +5,9 @@ import { AppText } from '@/components/app-text';
 import { Button } from '@/components/ui/button';
 import { Fab } from '@/components/ui/fab';
 import { useVideos } from '@/hooks/use-videos';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
   const { data: videos, isPending, error } = useVideos();
-  const insets = useSafeAreaInsets();
 
   if (isPending) {
     return (
@@ -45,7 +43,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <View className="flex-1 px-4" style={{ paddingBottom: insets.bottom, paddingTop: insets.top }}>
+    <View className="py-safe flex-1 px-5">
       <FlatList
         data={videos}
         keyExtractor={(item) => item.id.toString()}
@@ -54,7 +52,7 @@ export default function HomeScreen() {
             Videos
           </AppText>
         }
-        contentContainerStyle={{ gap: 12 }}
+        contentContainerClassName="gap-3"
         renderItem={({ item }) => (
           <Link href={`/videos/${item.id}`} asChild>
             <Pressable className="overflow-hidden rounded-2xl bg-white shadow active:opacity-80">
