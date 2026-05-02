@@ -1,12 +1,14 @@
+import * as MediaLibrary from 'expo-media-library';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
+import * as Sharing from 'expo-sharing';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { ActivityIndicator, Alert, ScrollView, View } from 'react-native';
+import { Menu, MenuOption, MenuOptions, MenuTrigger } from 'react-native-popup-menu';
 
 import { AppText } from '@/components/app-text';
 import { Button } from '@/components/ui/button';
 import { useDeleteVideo, useVideoById } from '@/hooks/use-videos';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { Menu, MenuOption, MenuOptions, MenuTrigger } from 'react-native-popup-menu';
 import colors from 'tailwindcss/colors';
 
 function DetailVideoPlayer({ uri }: { uri: string }) {
@@ -70,6 +72,27 @@ export default function VideoDetailScreen() {
     ]);
   };
 
+  const saveVideoToGallery = async (uri: string) => {
+    const permission = await MediaLibrary.requestPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert('Permission required', 'Please allow access to save the video to your library.');
+      return;
+    }
+    await MediaLibrary.saveToLibraryAsync(uri);
+
+    Alert.alert('Saved', 'Video saved to your library.');
+  };
+
+  const shareVideo = async (uri: string) => {
+    const isAvailable = await Sharing.isAvailableAsync();
+    if (!isAvailable) {
+      Alert.alert('Sharing unavailable', 'Sharing is not available on this device.');
+      return;
+    }
+
+    await Sharing.shareAsync(uri);
+  };
+
   if (isPending) {
     return <VideoDetailSkeleton />;
   }
@@ -116,6 +139,19 @@ export default function VideoDetailScreen() {
                   <View className="flex-row items-center gap-3 px-3 py-2">
                     <MaterialIcons name="edit" size={20} color="black" />
                     <AppText>Edit</AppText>
+                  </View>
+                </MenuOption>
+                <MenuOption onSelect={() => saveVideoToGallery(video.uri)}>
+                  <View className="flex-row items-center gap-3 px-3 py-2">
+                    <MaterialIcons name="file-download" size={20} color="black" />
+                    <AppText>Save</AppText>
+                  </View>
+                </MenuOption>
+
+                <MenuOption onSelect={() => shareVideo(video.uri)}>
+                  <View className="flex-row items-center gap-3 px-3 py-2">
+                    <MaterialIcons name="share" size={20} color="black" />
+                    <AppText>Share</AppText>
                   </View>
                 </MenuOption>
 
