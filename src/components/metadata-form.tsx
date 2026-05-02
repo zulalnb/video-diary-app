@@ -8,7 +8,7 @@ import { VideoMetadataFormValues } from '@/schemas/metadata';
 
 type MetadataFormProps = {
   isSubmitting?: boolean;
-  onSubmit: () => void;
+  onSubmit?: () => void;
 };
 
 export function MetadataForm({ isSubmitting = false, onSubmit }: MetadataFormProps) {

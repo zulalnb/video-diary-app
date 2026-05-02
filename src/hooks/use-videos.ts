@@ -58,7 +58,7 @@ export function useUpdateVideo() {
       video: Partial<{ name: string; description?: string }>;
     }) => updateVideo(id, video),
     onSuccess: (_, variable) => {
-      queryClient.setQueryData(['video', variable.id], variable);
+      queryClient.invalidateQueries({ queryKey: ['video', variable.id] });
       queryClient.invalidateQueries({ queryKey: ['videos'] });
     },
   });

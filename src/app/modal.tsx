@@ -149,7 +149,7 @@ export default function ModalScreen() {
     <FormProvider {...form}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} className="flex-1">
         <KeyboardAvoidingView
-          className="py-safe flex-1 px-5"
+          className="pb-safe flex-1 px-5 pt-[calc(env(safe-area-inset-top)+5)]"
           behavior={'padding'}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 50 : -40}>
           <View className="flex-1">
@@ -184,7 +184,7 @@ export default function ModalScreen() {
                 <Button
                   title={isSaving ? 'Saving...' : 'Save'}
                   loading={isSaving}
-                  disabled={isSaving}
+                  disabled={isSaving || !form.formState.isDirty}
                   onPress={form.handleSubmit(handleSave)}
                   className="flex-1"
                 />
