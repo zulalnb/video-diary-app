@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 
 import { db } from '@/db/client';
 import { videos } from '@/db/schema';
@@ -135,4 +135,25 @@ export const updateVideo = async (
 export const deleteVideo = async (id: number) => {
   await simulateNetworkLatency();
   return db.delete(videos).where(eq(videos.id, id)).run();
+};
+
+/**
+ * Deletes multiple videos by their IDs
+ *
+ * @param ids - An array of unique identifiers of the videos to delete
+ *
+ * @remarks
+ * This function removes the specified videos from the database permanently.
+ * Network latency is simulated to emulate real-world API behavior.
+ *
+ * @returns A promise that resolves when the videos are deleted
+ *
+ * @example
+ * ```typescript
+ * await deleteVideos([1, 2, 3]);
+ * ```
+ */
+export const deleteVideos = async (ids: number[]) => {
+  await simulateNetworkLatency();
+  return db.delete(videos).where(inArray(videos.id, ids));
 };

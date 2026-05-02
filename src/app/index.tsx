@@ -9,7 +9,7 @@ import { useVideos } from '@/hooks/use-videos';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function HomeScreen() {
-  const { data: videos, isPending, error, refetch } = useVideos();
+  const { data: videos, isPending, isRefetching, error, refetch } = useVideos();
 
   if (isPending) {
     return (
@@ -76,6 +76,8 @@ export default function HomeScreen() {
         renderItem={({ item }) => (
           <VideoCard id={item.id} thumbnail={item.thumbnail} name={item.name} />
         )}
+        refreshing={isRefetching}
+        onRefresh={refetch}
       />
 
       {/* Floating button */}

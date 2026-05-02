@@ -37,7 +37,7 @@ export default function ModalScreen() {
 
   const navigation = useNavigation();
 
-  const shouldPreventClose = form.formState.isDirty && !isSaving;
+  const shouldPreventClose = form.formState.isDirty && !isSaving && !form.formState.isSubmitted;
 
   usePreventRemove(shouldPreventClose, ({ data }) => {
     Alert.alert('Discard changes?', 'Your video details will be lost.', [

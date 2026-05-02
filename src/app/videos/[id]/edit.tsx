@@ -63,7 +63,7 @@ export default function VideoDetailScreen() {
     },
   });
 
-  usePreventRemove(form.formState.isDirty, ({ data }) => {
+  usePreventRemove(form.formState.isDirty && !form.formState.isSubmitted, ({ data }) => {
     Alert.alert(
       'Discard changes?',
       'Your changes will be lost.',

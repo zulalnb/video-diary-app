@@ -1,4 +1,4 @@
-import * as MediaLibrary from 'expo-media-library';
+// import * as MediaLibrary from 'expo-media-library';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useVideoPlayer, VideoView } from 'expo-video';
@@ -72,7 +72,8 @@ export default function VideoDetailScreen() {
     ]);
   };
 
-  const saveVideoToGallery = async (uri: string) => {
+  // Disabled in Expo Go. Real implementation works in development build.
+  /* const saveVideoToGallery = async (uri: string) => {
     const permission = await MediaLibrary.requestPermissionsAsync();
     if (!permission.granted) {
       Alert.alert('Permission required', 'Please allow access to save the video to your library.');
@@ -81,7 +82,7 @@ export default function VideoDetailScreen() {
     await MediaLibrary.saveToLibraryAsync(uri);
 
     Alert.alert('Saved', 'Video saved to your library.');
-  };
+  }; */
 
   const shareVideo = async (uri: string) => {
     const isAvailable = await Sharing.isAvailableAsync();
@@ -141,20 +142,18 @@ export default function VideoDetailScreen() {
                     <AppText>Edit</AppText>
                   </View>
                 </MenuOption>
-                <MenuOption onSelect={() => saveVideoToGallery(video.uri)}>
+                {/*  <MenuOption onSelect={() => saveVideoToGallery(video.uri)}>
                   <View className="flex-row items-center gap-3 px-3 py-2">
                     <MaterialIcons name="file-download" size={20} color="black" />
                     <AppText>Save</AppText>
                   </View>
-                </MenuOption>
-
+                </MenuOption> */}
                 <MenuOption onSelect={() => shareVideo(video.uri)}>
                   <View className="flex-row items-center gap-3 px-3 py-2">
                     <MaterialIcons name="share" size={20} color="black" />
                     <AppText>Share</AppText>
                   </View>
                 </MenuOption>
-
                 <MenuOption onSelect={handleDelete}>
                   <View className="flex-row items-center gap-3 px-3 py-2">
                     <MaterialIcons name="delete-outline" size={20} color={colors.red[500]} />
