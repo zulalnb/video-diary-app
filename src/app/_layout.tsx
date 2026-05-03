@@ -18,7 +18,10 @@ export default function RootLayout() {
         <MenuProvider>
           <DatabaseProvider>
             <QueryProvider>
-              <Stack screenOptions={{ headerBackButtonDisplayMode: 'minimal' }}>
+              <Stack
+                screenOptions={{
+                  headerBackButtonDisplayMode: 'minimal',
+                }}>
                 <Stack.Screen name="index" options={{ headerTitle: 'My Moments' }} />
                 <Stack.Screen
                   name="videos/[id]/index"

@@ -1,6 +1,7 @@
+import * as Haptics from 'expo-haptics';
 import { Link, router, Stack } from 'expo-router';
 import { useState } from 'react';
-import { Alert, FlatList, View } from 'react-native';
+import { Alert, FlatList, Pressable, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { AppView } from '@/components/app-view';
@@ -10,6 +11,7 @@ import { Fab } from '@/components/ui/fab';
 import { VideoCard, VideoCardSkeleton } from '@/components/video-card';
 import { Video } from '@/db/schema';
 import { useDeleteVideos, useVideos } from '@/hooks/use-videos';
+import { useSettingsStore } from '@/lib/settings-store';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import colors from 'tailwindcss/colors';
 
@@ -19,6 +21,13 @@ export default function HomeScreen() {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const { data: videos, isPending, isRefetching, error, refetch } = useVideos();
   const deleteVideos = useDeleteVideos();
+  const { hapticsEnabled } = useSettingsStore();
+
+  const triggerSelectionHaptic = async () => {
+    if (hapticsEnabled) {
+      await Haptics.selectionAsync();
+    }
+  };
 
   const toggleSelect = (id: number) => {
     setSelectedIds((prev) =>
@@ -49,6 +58,7 @@ export default function HomeScreen() {
       selected={selectedIds.includes(item.id)}
       selectionMode={selectionMode}
       onLongPress={() => {
+        triggerSelectionHaptic();
         setSelectionMode(true);
         setSelectedIds([item.id]);
       }}
@@ -149,7 +159,11 @@ export default function HomeScreen() {
                   }}
                 />
               </View>
-            ) : null,
+            ) : (
+              <Pressable onPress={() => router.push('/settings')}>
+                <MaterialIcons name="settings" color={colors.black} size={24} />
+              </Pressable>
+            ),
         }}
       />
       <AppView className="pb-safe flex-1 px-5 pt-5">
