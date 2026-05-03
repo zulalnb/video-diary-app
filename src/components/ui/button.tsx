@@ -1,42 +1,61 @@
-import { cn } from '@/lib/utils';
-import { ActivityIndicator, Text, TouchableOpacity, TouchableOpacityProps } from 'react-native';
+import { ActivityIndicator, Pressable, PressableProps, Text } from 'react-native';
 import colors from 'tailwindcss/colors';
 
+import { cn } from '@/lib/utils';
+
 type ButtonProps = {
-  title: string;
-  variant?: 'primary' | 'secondary' | 'destructive';
+  title?: string;
+  variant?: 'primary' | 'secondary' | 'destructive' | 'ghost';
   loading?: boolean;
-} & TouchableOpacityProps;
+  icon?: React.ReactNode;
+  iconPosition?: 'start' | 'end';
+  textClassName?: string;
+} & PressableProps;
 
 export function Button({
   title,
   variant = 'primary',
   loading = false,
   disabled,
+  icon,
+  iconPosition = 'start',
   className,
+  textClassName,
   ...props
 }: ButtonProps) {
   const isDisabled = disabled || loading;
-  const textStyle = variant !== 'secondary' ? 'text-white' : 'text-gray-800';
+
+  const textStyle =
+    variant === 'secondary'
+      ? 'text-gray-800'
+      : variant === 'ghost'
+        ? 'text-indigo-500'
+        : 'text-white';
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.8}
+    <Pressable
       disabled={isDisabled}
       className={cn(
-        'items-center justify-center rounded-xl px-5 py-3',
+        'flex-row items-center justify-center gap-2 rounded-xl px-5 py-3',
         variant === 'primary' && 'bg-indigo-500',
         variant === 'secondary' && 'bg-gray-200',
         variant === 'destructive' && 'bg-red-500',
+        variant === 'ghost' && 'bg-transparent',
         isDisabled && 'opacity-50',
         className
       )}
       {...props}>
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? colors.white : colors.black} />
+        <ActivityIndicator
+          color={variant === 'primary' || variant === 'destructive' ? colors.white : colors.black}
+        />
       ) : (
-        <Text className={cn('font-semibold', textStyle)}>{title}</Text>
+        <>
+          {icon && iconPosition === 'start' && <>{icon}</>}
+          {title && <Text className={cn('font-semibold', textStyle, textClassName)}>{title}</Text>}
+          {icon && iconPosition === 'end' && <>{icon}</>}
+        </>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 }

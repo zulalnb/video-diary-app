@@ -1,4 +1,4 @@
-import { eq, inArray } from 'drizzle-orm';
+import { desc, eq, inArray } from 'drizzle-orm';
 
 import { db } from '@/db/client';
 import { videos } from '@/db/schema';
@@ -21,7 +21,7 @@ import { simulateNetworkLatency } from './utils';
  */
 export const getAllVideos = async () => {
   await simulateNetworkLatency();
-  return db.select().from(videos).all();
+  return db.select().from(videos).orderBy(desc(videos.updated_at)).all();
 };
 
 /**

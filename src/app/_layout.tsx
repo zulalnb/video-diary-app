@@ -19,7 +19,7 @@ export default function RootLayout() {
           <DatabaseProvider>
             <QueryProvider>
               <Stack screenOptions={{ headerBackButtonDisplayMode: 'minimal' }}>
-                <Stack.Screen name="index" options={{ headerShown: false }} />
+                <Stack.Screen name="index" options={{ headerTitle: 'My Moments' }} />
                 <Stack.Screen
                   name="videos/[id]/index"
                   options={{
@@ -34,7 +34,14 @@ export default function RootLayout() {
                 />
                 <Stack.Screen
                   name="modal"
-                  options={{ presentation: 'modal', headerShown: false }}
+                  options={{
+                    presentation: 'modal',
+                    headerTitle: 'Create Video',
+                    headerTitleStyle: {
+                      fontSize: 24,
+                      fontWeight: 'bold',
+                    },
+                  }}
                 />
               </Stack>
               <StatusBar style="dark" />

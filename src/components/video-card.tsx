@@ -1,6 +1,7 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
 import { useEffect } from 'react';
-import { Image, Pressable, View } from 'react-native';
+import { Image, Pressable, PressableProps, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -8,28 +9,117 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { AppText } from '@/components/app-text';
+import type { Video } from '@/db/schema';
+import { cn } from '@/lib/utils';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { AppText } from './app-text';
 
-type VideoCardProps = {
-  id: number;
-  thumbnail: string;
-  name: string;
-};
+type VideoCardProps = Pick<Video, 'id' | 'thumbnail' | 'name'> &
+  Omit<PressableProps, 'id'> & {
+    selected?: boolean;
+    selectionMode?: boolean;
+    createdAt: string;
+  };
 
-export function VideoCard({ id, thumbnail, name }: VideoCardProps) {
+function VideoCardContent({
+  thumbnail,
+  name,
+  selected,
+  selectionMode,
+  createdAt,
+  ...props
+}: Omit<VideoCardProps, 'id'>) {
+  const formattedDate = new Date(createdAt).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+
   return (
-    <Link href={`/videos/${id}`} asChild>
-      <Pressable className="overflow-hidden rounded-2xl bg-white shadow active:opacity-80">
-        <Image source={{ uri: thumbnail }} className="h-48 w-full" resizeMode="cover" />
+    <Pressable
+      className="relative h-56 overflow-hidden rounded-2xl shadow active:opacity-80"
+      {...props}>
+      <Image
+        source={{ uri: thumbnail }}
+        className="absolute inset-0 h-full w-full"
+        resizeMode="cover"
+      />
+      <LinearGradient
+        colors={['rgba(11,19,38,0)', 'rgba(11,19,38,0.9)']}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        className="absolute inset-0"
+      />
+      {selected && selectionMode && (
+        <View className="absolute inset-0 z-10 rounded-2xl border-2 border-indigo-500" />
+      )}
 
-        <View className="p-3">
-          <AppText className="text-base font-semibold">{name}</AppText>
+      {/* selection overlay */}
+      {selectionMode && (
+        <View className="absolute inset-0 ">
+          <View
+            className={cn(
+              'absolute left-3 top-3 h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-black/40',
+              selected && 'border-transparent bg-indigo-500'
+            )}>
+            {selected && <MaterialIcons name="check" size={18} color="white" />}
+          </View>
         </View>
-      </Pressable>
-    </Link>
+      )}
+
+      {/* play icon */}
+      {!selectionMode && (
+        <View className="absolute inset-0 items-center justify-center">
+          <View className="h-14 w-14 items-center justify-center rounded-full bg-slate-200/20">
+            <MaterialIcons name="play-arrow" size={40} color="white" />
+          </View>
+        </View>
+      )}
+
+      {/* bottom metadata overlay */}
+      <View className="absolute bottom-0 left-0 right-0 px-4 py-3">
+        <AppText className="text-sm text-white/80">{formattedDate}</AppText>
+
+        <AppText className="mt-0.5 text-base font-semibold text-white" numberOfLines={1}>
+          {name}
+        </AppText>
+      </View>
+    </Pressable>
   );
 }
 
+export function VideoCard({
+  id,
+  thumbnail,
+  name,
+  selected = false,
+  selectionMode = false,
+  ...props
+}: VideoCardProps) {
+  if (selectionMode) {
+    return (
+      <VideoCardContent
+        thumbnail={thumbnail}
+        name={name}
+        selected={selected}
+        selectionMode={selectionMode}
+        {...props}
+      />
+    );
+  }
+
+  return (
+    <Link href={`/videos/${id}`} asChild>
+      <VideoCardContent
+        thumbnail={thumbnail}
+        name={name}
+        selected={selected}
+        selectionMode={selectionMode}
+        {...props}
+      />
+    </Link>
+  );
+}
 export function VideoCardSkeleton() {
   const opacity = useSharedValue(0.4);
 

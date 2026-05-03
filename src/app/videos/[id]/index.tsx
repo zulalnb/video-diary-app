@@ -1,41 +1,27 @@
 // import * as MediaLibrary from 'expo-media-library';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import * as Sharing from 'expo-sharing';
-import { useVideoPlayer, VideoView } from 'expo-video';
 import { ActivityIndicator, Alert, ScrollView, View } from 'react-native';
 import { Menu, MenuOption, MenuOptions, MenuTrigger } from 'react-native-popup-menu';
 
 import { AppText } from '@/components/app-text';
 import { Button } from '@/components/ui/button';
+import { VideoPlayer } from '@/components/video-player';
 import { useDeleteVideo, useVideoById } from '@/hooks/use-videos';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { format } from 'date-fns';
 import colors from 'tailwindcss/colors';
-
-function DetailVideoPlayer({ uri }: { uri: string }) {
-  const player = useVideoPlayer(uri, (player) => {
-    player.loop = true;
-    player.pause();
-  });
-
-  return (
-    <VideoView
-      player={player}
-      className="aspect-video w-full rounded-2xl bg-black"
-      contentFit="contain"
-      nativeControls
-      surfaceType="textureView"
-    />
-  );
-}
 
 function VideoDetailSkeleton() {
   return (
-    <View className="flex-1 bg-white px-5 pt-6">
+    <View className="pb-safe flex-1 bg-white">
       <View className="aspect-video w-full rounded-2xl bg-gray-200" />
-      <View className="mt-6 w-full">
+      <View className="mt-6 w-full px-5">
         <View className="mb-3 h-7 w-2/3 rounded bg-gray-200" />
         <View className="mb-2 h-4 w-full rounded bg-gray-200" />
         <View className="mb-2 h-4 w-5/6 rounded bg-gray-200" />
+        <View className="mt-4 h-3 w-1/3 rounded bg-gray-200" />
+        <View className="mt-4 h-3 w-1/3 rounded bg-gray-200" />
         <View className="mt-4 h-3 w-1/3 rounded bg-gray-200" />
       </View>
     </View>
@@ -165,21 +151,24 @@ export default function VideoDetailScreen() {
           ),
         }}
       />
-      <ScrollView className="flex-1 bg-white" contentContainerClassName="px-5 pt-6 pb-safe">
-        <DetailVideoPlayer uri={video.uri} />
+      <ScrollView className="flex-1 bg-white" contentContainerClassName="pb-safe">
+        <VideoPlayer uri={video.uri} className="rounded-none" />
 
-        <View className="mt-6 w-full">
-          <AppText type="title" className="mb-2">
+        <View className="mt-6 px-5">
+          {/* Date Badge */}
+          <View className="mb-4 self-start rounded-2xl border border-amber-800/20 bg-amber-800/10 px-3 py-1">
+            <AppText className="text-sm font-medium text-amber-900">
+              {format(video.created_at, 'MMMM dd, yyyy')}
+            </AppText>
+          </View>
+          <AppText type="title" className="mb-4">
             {video.name}
           </AppText>
-
           {video.description ? (
-            <AppText className="leading-6 text-gray-500">{video.description}</AppText>
+            <AppText className="text-lg leading-6 text-gray-500">{video.description}</AppText>
           ) : (
             <AppText className="text-gray-400">No description</AppText>
           )}
-
-          <AppText className="mt-4 text-xs text-gray-400">Created at: {video.created_at}</AppText>
         </View>
       </ScrollView>
       {deleteVideo.isPending && (

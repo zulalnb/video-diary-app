@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { VideoView } from 'expo-video';
 import { cssInterop } from 'nativewind';
 import { TextInput } from 'react-native';
@@ -24,5 +25,11 @@ cssInterop(TextInput, {
     nativeStyleToProp: {
       color: 'selectionColor',
     },
+  },
+});
+
+cssInterop(LinearGradient, {
+  className: {
+    target: 'style',
   },
 });

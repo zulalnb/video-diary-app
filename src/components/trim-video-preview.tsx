@@ -14,15 +14,15 @@ type TrimVideoPreviewProps = {
   startTime: number;
   clipDuration?: number;
   className?: string;
-  fullHeight?: boolean;
+  nativeControls?: boolean;
 };
 
 export function TrimVideoPreview({
   uri,
   startTime,
   clipDuration = 5,
+  nativeControls = false,
   className,
-  fullHeight = false,
 }: TrimVideoPreviewProps) {
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevStartRef = useRef(startTime);
@@ -110,24 +110,30 @@ export function TrimVideoPreview({
 
   return (
     <View
-      className={cn('relative items-center overflow-hidden rounded-xl bg-slate-600', className)}>
+      className={cn(
+        'relative w-full items-center justify-center overflow-hidden rounded-xl bg-slate-300/45',
+        // fullHeight ? 'h-full' : 'aspect-video',
+        className
+      )}>
       <VideoView
         player={player}
-        className={cn('aspect-video', !fullHeight ? 'w-full' : 'h-full')}
+        className={cn('w-full', 'h-full')}
         contentFit="contain"
-        nativeControls={false}
+        nativeControls={nativeControls}
         surfaceType="textureView"
       />
 
-      <Pressable
-        onPress={handleTogglePlayback}
-        className="absolute inset-0 items-center justify-center">
-        <Animated.View pointerEvents="none" style={overlayStyle} className="">
-          <View className="h-16 w-16 items-center justify-center rounded-full bg-black/50">
-            <MaterialIcons name={iconName} size={40} color="white" />
-          </View>
-        </Animated.View>
-      </Pressable>
+      {!nativeControls && (
+        <Pressable
+          onPress={handleTogglePlayback}
+          className="absolute inset-0 items-center justify-center">
+          <Animated.View pointerEvents="none" style={overlayStyle} className="">
+            <View className="h-16 w-16 items-center justify-center rounded-full bg-black/50">
+              <MaterialIcons name={iconName} size={40} color="white" />
+            </View>
+          </Animated.View>
+        </Pressable>
+      )}
     </View>
   );
 }

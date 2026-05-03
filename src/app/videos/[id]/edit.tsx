@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { usePreventRemove } from '@react-navigation/native';
 import { router, Stack, useLocalSearchParams, useNavigation } from 'expo-router';
-import { useVideoPlayer, VideoView } from 'expo-video';
 import { FormProvider, useForm } from 'react-hook-form';
 import { Alert, View } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
@@ -8,27 +8,10 @@ import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboa
 import { AppText } from '@/components/app-text';
 import { MetadataForm } from '@/components/metadata-form';
 import { Button } from '@/components/ui/button';
+import { VideoPlayer } from '@/components/video-player';
 import { useUpdateVideo, useVideoById } from '@/hooks/use-videos';
 import { VideoMetadataFormValues, videoMetadataSchema } from '@/schemas/metadata';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { usePreventRemove } from '@react-navigation/native';
-
-function DetailVideoPlayer({ uri }: { uri: string }) {
-  const player = useVideoPlayer(uri, (player) => {
-    player.loop = true;
-    player.pause();
-  });
-
-  return (
-    <VideoView
-      player={player}
-      className="mb-10 aspect-video w-full rounded-2xl bg-black"
-      contentFit="contain"
-      nativeControls
-      surfaceType="textureView"
-    />
-  );
-}
 
 function VideoDetailSkeleton() {
   return (
@@ -128,7 +111,7 @@ export default function VideoDetailScreen() {
           bottomOffset={100}
           className="flex-1 bg-white"
           contentContainerClassName="px-5 pt-6 pb-safe">
-          <DetailVideoPlayer uri={video.uri} />
+          <VideoPlayer uri={video.uri} className="mb-6" />
           <MetadataForm />
         </KeyboardAwareScrollView>
         <KeyboardStickyView offset={{ closed: 0, opened: 16 }}>

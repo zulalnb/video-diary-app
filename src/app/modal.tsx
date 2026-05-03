@@ -1,12 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { router, useNavigation } from 'expo-router';
+import { usePreventRemove } from '@react-navigation/native';
+import { router, Stack, useNavigation } from 'expo-router';
 import * as VideoThumbnails from 'expo-video-thumbnails';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { Alert, Keyboard, Platform, TouchableWithoutFeedback, View } from 'react-native';
-import { KeyboardAvoidingView, KeyboardEvents } from 'react-native-keyboard-controller';
+import { Alert, Platform, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
-import { STEPS, Step } from '@/constants/video-flow';
+import { Step, STEPS } from '@/constants/video-flow';
 import { useCreateVideo } from '@/hooks/use-videos';
 import { videoMetadataSchema, type VideoMetadataFormValues } from '@/schemas/metadata';
 import type { PickedVideoAsset } from '@/types/video';
@@ -15,14 +16,14 @@ import { Button } from '@/components/ui/button';
 import { MetadataStep } from '@/components/video-flow/metadata-step';
 import { SelectVideoStep } from '@/components/video-flow/select-video-step';
 import { TrimVideoStep } from '@/components/video-flow/trim-video-step';
-import { usePreventRemove } from '@react-navigation/native';
+import { cn } from '@/lib/utils';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function ModalScreen() {
   const [step, setStep] = useState<Step>(STEPS.SELECT);
   const [video, setVideo] = useState<PickedVideoAsset | null>(null);
   const [startTime, setStartTime] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
-  const [keyboardShown, setKeyboardShown] = useState(false);
 
   // const trimVideoMutation = useTrimVideo();
   const createVideo = useCreateVideo();
@@ -52,21 +53,6 @@ export default function ModalScreen() {
       },
     ]);
   });
-
-  useEffect(() => {
-    const showSubscription = KeyboardEvents.addListener('keyboardWillShow', () => {
-      setKeyboardShown(true);
-    });
-
-    const hideSubscription = KeyboardEvents.addListener('keyboardWillHide', () => {
-      setKeyboardShown(false);
-    });
-
-    return () => {
-      showSubscription.remove();
-      hideSubscription.remove();
-    };
-  }, []);
 
   const handleSelectVideo = (selectedVideo: PickedVideoAsset | null) => {
     setVideo(selectedVideo);
@@ -147,54 +133,91 @@ export default function ModalScreen() {
 
   return (
     <FormProvider {...form}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} className="flex-1">
-        <KeyboardAvoidingView
-          className="pb-safe flex-1 px-5 pt-[calc(env(safe-area-inset-top)+5)]"
-          behavior={'padding'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 50 : -40}>
-          <View className="flex-1">
-            {step === STEPS.SELECT && (
-              <SelectVideoStep video={video} onSelectVideo={handleSelectVideo} />
-            )}
-            {step === STEPS.TRIM && video && (
-              <TrimVideoStep video={video} startTime={startTime} onChangeStartTime={setStartTime} />
-            )}
-            {step === STEPS.METADATA && video && (
-              <MetadataStep
-                video={video}
-                startTime={startTime}
-                isSubmitting={isSaving}
-                onSubmit={form.handleSubmit(handleSave)}
+      <Stack.Screen
+        options={{
+          headerTitle:
+            step === STEPS.TRIM
+              ? 'Trim Your Moment'
+              : step === STEPS.METADATA
+                ? 'Add Details'
+                : 'Select Video',
+          headerLeft: () =>
+            Platform.OS === 'android' ? (
+              <Button
+                disabled={isSaving}
+                variant="ghost"
+                onPress={() => router.dismissTo('/')}
+                icon={<MaterialIcons name="close" color="black" size={24} />}
               />
-            )}
+            ) : null,
+          headerRight: () =>
+            step === STEPS.METADATA ? (
+              <Button
+                title={isSaving ? 'Saving' : 'Save'}
+                className="py-2.5"
+                loading={isSaving}
+                disabled={isSaving || !form.formState.isDirty}
+                onPress={form.handleSubmit(handleSave)}
+              />
+            ) : null,
+        }}
+      />
+      <KeyboardAwareScrollView
+        className="flex-1 px-5 pt-10"
+        contentContainerClassName={cn(step === STEPS.TRIM && 'flex-1')}
+        keyboardShouldPersistTaps="handled"
+        bottomOffset={20}>
+        {step === STEPS.SELECT && (
+          <SelectVideoStep video={video} onSelectVideo={handleSelectVideo} />
+        )}
+        {step === STEPS.TRIM && video && (
+          <TrimVideoStep video={video} startTime={startTime} onChangeStartTime={setStartTime} />
+        )}
+        {step === STEPS.METADATA && video && (
+          <MetadataStep
+            video={video}
+            startTime={startTime}
+            isSubmitting={isSaving}
+            onSubmit={form.handleSubmit(handleSave)}
+          />
+        )}
+      </KeyboardAwareScrollView>
+      <View className="flex-row items-center gap-3 px-5 pb-[calc(env(safe-area-inset-bottom)+20)]">
+        {step !== STEPS.SELECT && (
+          <View className="flex-1">
+            <Button
+              title="Back"
+              variant="secondary"
+              className="h-12"
+              disabled={isSaving}
+              onPress={handleBack}
+            />
           </View>
-          <View className="w-full pb-12">
-            <View className="flex-row gap-8">
-              {!keyboardShown && (
-                <Button
-                  title="Back"
-                  variant="secondary"
-                  disabled={isSaving}
-                  onPress={handleBack}
-                  className="flex-1"
-                />
-              )}
+        )}
 
-              {step === STEPS.METADATA ? (
-                <Button
-                  title={isSaving ? 'Saving...' : 'Save'}
-                  loading={isSaving}
-                  disabled={isSaving || !form.formState.isDirty}
-                  onPress={form.handleSubmit(handleSave)}
-                  className="flex-1"
-                />
-              ) : (
-                <Button title="Next" disabled={!video} onPress={handleNext} className="flex-1" />
-              )}
-            </View>
+        {step === STEPS.METADATA ? (
+          <View className="flex-1">
+            <Button
+              title={isSaving ? 'Saving...' : 'Save'}
+              loading={isSaving}
+              disabled={isSaving || !form.formState.isDirty}
+              onPress={form.handleSubmit(handleSave)}
+              className="h-12"
+            />
           </View>
-        </KeyboardAvoidingView>
-      </TouchableWithoutFeedback>
+        ) : (
+          <View className="flex-1">
+            <Button
+              title={`Next: ${step === STEPS.SELECT ? 'Crop Video' : 'Add Details'}`}
+              disabled={!video}
+              onPress={handleNext}
+              icon={<MaterialIcons name="navigate-next" color="white" size={24} />}
+              iconPosition="end"
+              className="h-12"
+            />
+          </View>
+        )}
+      </View>
     </FormProvider>
   );
 }
