@@ -2,10 +2,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { usePreventRemove } from '@react-navigation/native';
 import { router, Stack, useLocalSearchParams, useNavigation } from 'expo-router';
 import { FormProvider, useForm } from 'react-hook-form';
-import { Alert, View } from 'react-native';
+import { Alert, Keyboard, View } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 
 import { AppText } from '@/components/app-text';
+import { AppView } from '@/components/app-view';
 import { MetadataForm } from '@/components/metadata-form';
 import { Button } from '@/components/ui/button';
 import { VideoPlayer } from '@/components/video-player';
@@ -15,7 +16,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 function VideoDetailSkeleton() {
   return (
-    <View className="flex-1 bg-white px-5 pt-6">
+    <AppView className="flex-1 px-5 pt-6">
       <View className="aspect-video w-full rounded-2xl bg-gray-200" />
       <View className="mt-6 w-full">
         <View className="mb-3 h-7 w-2/3 rounded bg-gray-200" />
@@ -23,7 +24,7 @@ function VideoDetailSkeleton() {
         <View className="mb-2 h-4 w-5/6 rounded bg-gray-200" />
         <View className="mt-4 h-3 w-1/3 rounded bg-gray-200" />
       </View>
-    </View>
+    </AppView>
   );
 }
 
@@ -47,6 +48,7 @@ export default function VideoDetailScreen() {
   });
 
   usePreventRemove(form.formState.isDirty && !form.formState.isSubmitted, ({ data }) => {
+    Keyboard.dismiss();
     Alert.alert(
       'Discard changes?',
       'Your changes will be lost.',
@@ -63,6 +65,7 @@ export default function VideoDetailScreen() {
   });
 
   const handleSave = async (values: VideoMetadataFormValues) => {
+    Keyboard.dismiss();
     if (!video) return;
     updateVideo.mutate(
       { id: Number(id), video: values },
@@ -83,18 +86,18 @@ export default function VideoDetailScreen() {
 
   if (error || !video) {
     return (
-      <View className="flex-1 items-center justify-center bg-white px-6">
+      <AppView className="flex-1 items-center justify-center px-6">
         <View className="mb-5 h-16 w-16 items-center justify-center rounded-full bg-red-50">
           <MaterialIcons name="error-outline" size={32} color="#ef4444" />
         </View>
-        <AppText type="title" className="mb-2 text-center">
+        <AppText center type="title" className="mb-2">
           Video not found
         </AppText>
-        <AppText className="mb-6 max-w-[280px] text-center text-gray-500">
+        <AppText center className="mb-6 max-w-[280px] text-gray-500">
           We couldn’t load this video. It may have been deleted or moved.
         </AppText>
         <Button title="Go back" variant="secondary" onPress={() => router.back()} />
-      </View>
+      </AppView>
     );
   }
 

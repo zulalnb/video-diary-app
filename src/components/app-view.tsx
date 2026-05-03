@@ -7,5 +7,5 @@ export type AppViewProps = ViewProps & {
 };
 
 export function AppView({ className, ...otherProps }: AppViewProps) {
-  return <View className={cn('bg-white dark:bg-neutral-950', className)} {...otherProps} />;
+  return <View className={cn('bg-white', className)} {...otherProps} />;
 }

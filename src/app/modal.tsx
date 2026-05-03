@@ -4,7 +4,7 @@ import { router, Stack, useNavigation } from 'expo-router';
 import * as VideoThumbnails from 'expo-video-thumbnails';
 import { useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { Alert, Platform, View } from 'react-native';
+import { Alert, Keyboard, Platform, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
 import { Step, STEPS } from '@/constants/video-flow';
@@ -41,6 +41,7 @@ export default function ModalScreen() {
   const shouldPreventClose = form.formState.isDirty && !isSaving && !form.formState.isSubmitted;
 
   usePreventRemove(shouldPreventClose, ({ data }) => {
+    Keyboard.dismiss();
     Alert.alert('Discard changes?', 'Your video details will be lost.', [
       {
         text: 'Cancel',
@@ -97,6 +98,7 @@ export default function ModalScreen() {
   };
 
   const handleSave = async (values: VideoMetadataFormValues) => {
+    Keyboard.dismiss();
     if (!video) return;
 
     setIsSaving(true);

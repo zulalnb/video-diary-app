@@ -1,5 +1,4 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { Link } from 'expo-router';
 import { useEffect } from 'react';
 import { Image, Pressable, PressableProps, View } from 'react-native';
 import Animated, {
@@ -9,26 +8,26 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { AppText } from '@/components/app-text';
 import type { Video } from '@/db/schema';
 import { cn } from '@/lib/utils';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { AppText } from './app-text';
 
-type VideoCardProps = Pick<Video, 'id' | 'thumbnail' | 'name'> &
-  Omit<PressableProps, 'id'> & {
+type VideoCardProps = Pick<Video, 'name' | 'thumbnail'> &
+  PressableProps & {
     selected?: boolean;
     selectionMode?: boolean;
     createdAt: string;
   };
 
-function VideoCardContent({
-  thumbnail,
+export function VideoCard({
   name,
-  selected,
-  selectionMode,
+  thumbnail,
   createdAt,
+  selected = false,
+  selectionMode = false,
   ...props
-}: Omit<VideoCardProps, 'id'>) {
+}: VideoCardProps) {
   const formattedDate = new Date(createdAt).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -88,38 +87,6 @@ function VideoCardContent({
   );
 }
 
-export function VideoCard({
-  id,
-  thumbnail,
-  name,
-  selected = false,
-  selectionMode = false,
-  ...props
-}: VideoCardProps) {
-  if (selectionMode) {
-    return (
-      <VideoCardContent
-        thumbnail={thumbnail}
-        name={name}
-        selected={selected}
-        selectionMode={selectionMode}
-        {...props}
-      />
-    );
-  }
-
-  return (
-    <Link href={`/videos/${id}`} asChild>
-      <VideoCardContent
-        thumbnail={thumbnail}
-        name={name}
-        selected={selected}
-        selectionMode={selectionMode}
-        {...props}
-      />
-    </Link>
-  );
-}
 export function VideoCardSkeleton() {
   const opacity = useSharedValue(0.4);
 

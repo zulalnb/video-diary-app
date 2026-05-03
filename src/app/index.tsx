@@ -3,14 +3,18 @@ import { useState } from 'react';
 import { Alert, FlatList, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
+import { AppView } from '@/components/app-view';
+import { ConfirmModal } from '@/components/confirm-modal';
 import { Button } from '@/components/ui/button';
 import { Fab } from '@/components/ui/fab';
 import { VideoCard, VideoCardSkeleton } from '@/components/video-card';
+import { Video } from '@/db/schema';
 import { useDeleteVideos, useVideos } from '@/hooks/use-videos';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import colors from 'tailwindcss/colors';
 
 export default function HomeScreen() {
+  const [visibleModal, setVisibleModal] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const { data: videos, isPending, isRefetching, error, refetch } = useVideos();
@@ -23,73 +27,81 @@ export default function HomeScreen() {
   };
 
   const handleDelete = () => {
-    Alert.alert('Delete videos?', 'These videos will be permanently removed.', [
-      {
-        text: 'Cancel',
-        style: 'cancel',
+    deleteVideos.mutate(selectedIds, {
+      onSuccess: () => {
+        refetch();
+        setSelectionMode(false);
+        setSelectedIds([]);
+        setVisibleModal(false);
       },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => {
-          deleteVideos.mutate(selectedIds, {
-            onSuccess: () => {
-              refetch();
-              setSelectionMode(false);
-              setSelectedIds([]);
-            },
-            onError: () => {
-              Alert.alert('Delete failed', 'Something went wrong. Please try again.');
-            },
-          });
-        },
+      onError: () => {
+        setVisibleModal(false);
+        Alert.alert('Delete failed', 'Something went wrong. Please try again.');
       },
-    ]);
+    });
   };
+
+  const renderVideoCard = ({ item }: { item: Video }) => (
+    <VideoCard
+      name={item.name}
+      thumbnail={item.thumbnail}
+      createdAt={item.created_at}
+      selected={selectedIds.includes(item.id)}
+      selectionMode={selectionMode}
+      onLongPress={() => {
+        setSelectionMode(true);
+        setSelectedIds([item.id]);
+      }}
+      onPress={() => {
+        if (selectionMode) toggleSelect(item.id);
+        else router.push(`/videos/${item.id}`);
+      }}
+    />
+  );
 
   if (isPending) {
     return (
-      <View className="pb-safe flex-1 gap-6 px-5 pt-5">
+      <AppView className="pb-safe flex-1 gap-6 px-5 pt-5">
         {Array.from({ length: 5 }).map((_, index) => (
           <VideoCardSkeleton key={index} />
         ))}
-      </View>
+      </AppView>
     );
   }
 
   if (error) {
     return (
-      <View className="flex-1 items-center justify-center px-6">
+      <AppView className="flex-1 items-center justify-center px-6">
         <View className="mb-5 h-16 w-16 items-center justify-center rounded-full bg-gray-100">
           <MaterialIcons name="error-outline" size={32} color="#6b7280" />
         </View>
-        <AppText type="title" className="mb-2 text-center">
+        <AppText center type="title" className="mb-2">
           Something went wrong
         </AppText>
-        <AppText className="mb-6 max-w-[280px] text-center text-gray-500">
+        <AppText center className="mb-6 max-w-[280px] text-gray-500">
           We couldn’t load your videos. Please try again.
         </AppText>
         <Button title="Try again" onPress={() => refetch()} />
-      </View>
+      </AppView>
     );
   }
 
   if (!videos || videos.length === 0) {
     return (
-      <View className="pb-safe flex-1 items-center px-6 pt-40">
+      <AppView className="pb-safe flex-1 items-center px-6 pt-40">
         <View className="mb-5 h-16 w-16 items-center justify-center rounded-full bg-gray-100">
           <MaterialIcons name="videocam-off" size={48} color="#6b7280" />
         </View>
-        <AppText type="title" className="mb-2 text-center">
+        <AppText center type="title" className="mb-2">
           No videos yet
         </AppText>
-        <AppText className="mb-6 max-w-[280px] text-center text-gray-500">
+        <AppText center className="mb-6 max-w-[280px] text-gray-500">
           Add your first video to start creating memories.
         </AppText>
         <Link href="/modal" asChild>
           <Button title="Add Video" />
         </Link>
-      </View>
+      </AppView>
     );
   }
 
@@ -124,7 +136,7 @@ export default function HomeScreen() {
               <View className="flex-row justify-center gap-0.5">
                 <Button
                   variant="ghost"
-                  onPress={handleDelete}
+                  onPress={() => setVisibleModal(true)}
                   icon={<MaterialIcons name="delete-outline" size={20} color={colors.red[500]} />}
                 />
                 <Button
@@ -140,29 +152,12 @@ export default function HomeScreen() {
             ) : null,
         }}
       />
-      <View className="pb-safe flex-1 px-5 pt-5">
+      <AppView className="pb-safe flex-1 px-5 pt-5">
         <FlatList
           data={videos}
           keyExtractor={(item) => item.id.toString()}
           contentContainerClassName="gap-6"
-          renderItem={({ item }) => (
-            <VideoCard
-              id={item.id}
-              thumbnail={item.thumbnail}
-              name={item.name}
-              createdAt={item.created_at}
-              selected={selectedIds.includes(item.id)}
-              selectionMode={selectionMode}
-              onLongPress={() => {
-                setSelectionMode(true);
-                setSelectedIds([item.id]);
-              }}
-              onPress={() => {
-                if (selectionMode) toggleSelect(item.id);
-                else router.push(`/videos/${item.id}`);
-              }}
-            />
-          )}
+          renderItem={renderVideoCard}
           refreshing={isRefetching}
           onRefresh={refetch}
         />
@@ -173,7 +168,17 @@ export default function HomeScreen() {
             <Fab />
           </Link>
         )}
-      </View>
+
+        <ConfirmModal
+          visible={visibleModal}
+          title="Delete videos?"
+          description="Selected videos will be permanently removed."
+          loading={deleteVideos.isPending}
+          onConfirm={handleDelete}
+          confirmText="Delete"
+          onCancel={() => setVisibleModal(false)}
+        />
+      </AppView>
     </>
   );
 }

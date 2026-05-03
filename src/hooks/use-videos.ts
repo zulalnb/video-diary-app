@@ -59,8 +59,8 @@ export function useDeleteVideo() {
   return useMutation({
     mutationFn: deleteVideo,
     onSuccess: (_, id) => {
+      queryClient.cancelQueries({ queryKey: ['video', id] });
       queryClient.invalidateQueries({ queryKey: ['videos'] });
-      queryClient.removeQueries({ queryKey: ['video', id] });
     },
   });
 }

@@ -3,11 +3,11 @@ import { Alert, Pressable, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { Button } from '@/components/ui/button';
+import { VideoPlayer } from '@/components/video-player';
 import { CLIP_DURATION } from '@/constants/video-flow';
 import type { PickedVideoAsset } from '@/types/video';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import colors from 'tailwindcss/colors';
-import { VideoPlayer } from '../video-player';
 
 type SelectVideoStepProps = {
   video: PickedVideoAsset | null;
@@ -65,7 +65,7 @@ export function SelectVideoStep({ video, onSelectVideo }: SelectVideoStepProps) 
         <Pressable onPress={pickVideo}>
           <View className="aspect-video items-center rounded-xl border border-dashed border-gray-400 px-5 py-14">
             <MaterialIcons name="file-upload" size={48} color={colors.gray[400]} className="mb-4" />
-            <AppText className="w-9/12 text-center text-gray-400">
+            <AppText center className="w-9/12 text-gray-400">
               Choose a video from your device to create a 5-second diary clip.
             </AppText>
           </View>

@@ -78,7 +78,7 @@ export function TrimScrubber({
 
   return (
     <View className="w-full px-5">
-      <AppText className="mb-6 text-center text-sm text-gray-500">
+      <AppText center className="mb-6 text-sm text-gray-500">
         Drag to select a 5-second segment.
       </AppText>
 

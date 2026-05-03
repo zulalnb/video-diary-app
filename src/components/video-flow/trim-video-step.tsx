@@ -1,9 +1,9 @@
 import { View } from 'react-native';
 
 import { TrimScrubber } from '@/components/trim-scrubber';
+import { VideoPlayer } from '@/components/video-player';
 import { CLIP_DURATION } from '@/constants/video-flow';
 import type { PickedVideoAsset } from '@/types/video';
-import { VideoPlayer } from '../video-player';
 
 type TrimVideoStepProps = {
   video: PickedVideoAsset;

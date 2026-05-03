@@ -1,6 +1,6 @@
 import { MetadataForm } from '@/components/metadata-form';
+import { VideoPlayer } from '@/components/video-player';
 import type { PickedVideoAsset } from '@/types/video';
-import { VideoPlayer } from '../video-player';
 
 type MetadataStepProps = {
   video: PickedVideoAsset;
