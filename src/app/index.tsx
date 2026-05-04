@@ -143,7 +143,7 @@ export default function HomeScreen() {
             ) : null,
           headerRight: () =>
             selectionMode ? (
-              <View className="flex-row justify-center gap-0.5">
+              <View className="flex-row items-center justify-center gap-0.5">
                 <Button
                   variant="ghost"
                   onPress={() => setVisibleModal(true)}
@@ -160,9 +160,11 @@ export default function HomeScreen() {
                 />
               </View>
             ) : (
-              <Pressable onPress={() => router.push('/settings')}>
-                <MaterialIcons name="settings" color={colors.black} size={24} />
-              </Pressable>
+              <View className="flex items-center justify-center">
+                <Pressable onPress={() => router.push('/settings')}>
+                  <MaterialIcons name="settings" color={colors.black} size={24} />
+                </Pressable>
+              </View>
             ),
         }}
       />

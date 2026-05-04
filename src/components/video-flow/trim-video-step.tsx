@@ -1,9 +1,13 @@
 import { View } from 'react-native';
 
-import { TrimScrubber } from '@/components/trim-scrubber';
-import { VideoPlayer } from '@/components/video-player';
-import { CLIP_DURATION } from '@/constants/video-flow';
 import type { PickedVideoAsset } from '@/types/video';
+import { useEventListener } from 'expo';
+import { useVideoPlayer } from 'expo-video';
+import { useState } from 'react';
+
+import { Scrubber } from '@/components/scrubber';
+import { VideoPlayer } from '@/components/video-player';
+import useThrottle from '@/hooks/use-throttle';
 
 type TrimVideoStepProps = {
   video: PickedVideoAsset;
@@ -13,19 +17,49 @@ type TrimVideoStepProps = {
 
 export function TrimVideoStep({ video, startTime, onChangeStartTime }: TrimVideoStepProps) {
   const durationInSeconds = video.duration ? video.duration / 1000 : 0;
+  const [previewStartTime, setPreviewStartTime] = useState(startTime);
+
+  const player = useVideoPlayer(video.uri, (player) => {
+    player.currentTime = startTime;
+    player.loop = false;
+    player.pause();
+    player.timeUpdateEventInterval = 0.05;
+  });
+
+  useEventListener(player, 'timeUpdate', (event) => {
+    const currentTime = event.currentTime;
+
+    if (currentTime >= startTime + 5) {
+      // player.currentTime = startTime;
+      player.pause();
+    }
+  });
+
+  const throttledPreviewChange = useThrottle((value: number) => {
+    setPreviewStartTime(value);
+  }, 100);
 
   return (
     <View className="flex-[0.9] gap-4">
-      {/* <TrimVideoPreview uri={video.uri} startTime={startTime} className="flex-1" /> */}
       <View className="flex-1 items-center justify-center">
-        <VideoPlayer uri={video.uri} className="aspect-auto h-full" />
+        <VideoPlayer
+          className="aspect-auto h-full"
+          nativeControls={false}
+          player={player}
+          playFrom={startTime}
+        />
       </View>
 
-      <TrimScrubber
+      <Scrubber
+        videoDuration={durationInSeconds}
         startTime={startTime}
-        duration={durationInSeconds}
-        clipDuration={CLIP_DURATION}
-        onChange={onChangeStartTime}
+        previewStartTime={previewStartTime}
+        onPreviewChange={throttledPreviewChange}
+        onChange={(value) => {
+          onChangeStartTime(value);
+          setPreviewStartTime(value);
+          player.currentTime = value;
+        }}
       />
     </View>
   );
