@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { Link, router, Stack } from 'expo-router';
 import { useState } from 'react';
-import { Alert, FlatList, Pressable, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Pressable, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { AppView } from '@/components/app-view';
@@ -194,6 +194,14 @@ export default function HomeScreen() {
           confirmText="Delete"
           onCancel={() => setVisibleModal(false)}
         />
+        {deleteVideos.isPending && (
+          <View className="absolute inset-0 z-50 items-center justify-center bg-black/40">
+            <View className="items-center rounded-2xl bg-white px-6 py-5">
+              <ActivityIndicator />
+              <AppText className="mt-3 text-gray-600">Deleting selected videos...</AppText>
+            </View>
+          </View>
+        )}
       </AppView>
     </>
   );

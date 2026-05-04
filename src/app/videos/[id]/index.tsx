@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useState } from 'react';
-import { Alert, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, View } from 'react-native';
 import { Menu, MenuOption, MenuOptions, MenuTrigger } from 'react-native-popup-menu';
 
 import { AppText } from '@/components/app-text';
@@ -39,17 +39,17 @@ export default function VideoDetailScreen() {
   const { data: video, isPending, error } = useVideoById(videoId);
   const deleteVideo = useDeleteVideo();
 
-  const handleDelete = () =>
+  const handleDelete = () => {
+    setVisibleModal(false);
     deleteVideo.mutate(videoId, {
       onSuccess: () => {
-        setVisibleModal(false);
         router.back();
       },
       onError: () => {
-        setVisibleModal(false);
         Alert.alert('Delete failed', 'Something went wrong. Please try again.');
       },
     });
+  };
 
   // Disabled in Expo Go. Real implementation works in development build.
   /* const saveVideoToGallery = async (uri: string) => {
@@ -173,6 +173,14 @@ export default function VideoDetailScreen() {
         confirmText="Delete"
         onCancel={() => setVisibleModal(false)}
       />
+      {deleteVideo.isPending && (
+        <View className="absolute inset-0 z-50 items-center justify-center bg-black/40">
+          <View className="items-center rounded-2xl bg-white px-6 py-5">
+            <ActivityIndicator />
+            <AppText className="mt-3 text-gray-600">Deleting video...</AppText>
+          </View>
+        </View>
+      )}
     </>
   );
 }

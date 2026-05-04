@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 // import { trimVideo } from 'expo-trim-video';
+import { Video } from '@/db/schema';
 import {
   createVideo,
   deleteVideo,
@@ -46,9 +47,30 @@ export function useUpdateVideo() {
       id: number;
       video: Partial<{ name: string; description?: string }>;
     }) => updateVideo(id, video),
-    onSuccess: (_, variable) => {
-      queryClient.invalidateQueries({ queryKey: ['video', variable.id] });
-      queryClient.invalidateQueries({ queryKey: ['videos'] });
+    onSuccess: (_, variables) => {
+      queryClient.setQueryData(['video', variables.id], (old: Video | null | undefined) => {
+        if (!old) return old;
+
+        return {
+          ...old,
+          ...variables.video,
+          updated_at: new Date().toISOString(),
+        };
+      });
+
+      queryClient.setQueryData(['videos'], (old: Video[] | undefined) => {
+        if (!old) return old;
+
+        return old.map((item) =>
+          item.id === variables.id
+            ? {
+                ...item,
+                ...variables.video,
+                updated_at: new Date().toISOString(),
+              }
+            : item
+        );
+      });
     },
   });
 }
@@ -58,9 +80,19 @@ export function useDeleteVideo() {
 
   return useMutation({
     mutationFn: deleteVideo,
-    onSuccess: (_, id) => {
-      queryClient.cancelQueries({ queryKey: ['video', id] });
-      queryClient.invalidateQueries({ queryKey: ['videos'] });
+    onSuccess: async (_, id) => {
+      await queryClient.cancelQueries({ queryKey: ['video', id] });
+      await queryClient.cancelQueries({ queryKey: ['videos'] });
+
+      queryClient.setQueryData(
+        ['videos'],
+        (old: Awaited<ReturnType<typeof getAllVideos>> | undefined) => {
+          if (!old) return old;
+          return old.filter((video) => video.id !== id);
+        }
+      );
+
+      queryClient.removeQueries({ queryKey: ['video', id] });
     },
   });
 }
@@ -70,8 +102,16 @@ export function useDeleteVideos() {
 
   return useMutation({
     mutationFn: deleteVideos,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['videos'] });
+    onSuccess: async (_, ids) => {
+      await queryClient.cancelQueries({ queryKey: ['videos'] });
+
+      queryClient.setQueryData(
+        ['videos'],
+        (old: Awaited<ReturnType<typeof getAllVideos>> | undefined) => {
+          if (!old) return old;
+          return old.filter((video) => !ids.includes(video.id));
+        }
+      );
     },
   });
 }

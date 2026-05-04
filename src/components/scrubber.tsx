@@ -49,7 +49,7 @@ export function Scrubber({
   const panGesture = Gesture.Pan()
     .onBegin(() => {
       gestureStartX.value = startX.value;
-      scale.value = withTiming(1.5, { duration: 120 });
+      scale.value = withTiming(1.1, { duration: 120 });
     })
     .onUpdate((event) => {
       const nextX = gestureStartX.value + event.translationX;
