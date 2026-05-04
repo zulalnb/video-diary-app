@@ -155,6 +155,7 @@ export default function ModalScreen() {
           headerRight: () =>
             step === STEPS.METADATA ? (
               <Button
+                hitSlop={8}
                 title={isSaving ? 'Saving' : 'Save'}
                 className="py-2.5"
                 loading={isSaving}
@@ -167,6 +168,7 @@ export default function ModalScreen() {
       <KeyboardAwareScrollView
         className="flex-1 px-5 pt-10"
         contentContainerClassName={cn(step === STEPS.TRIM && 'flex-1')}
+        scrollEnabled={step === STEPS.METADATA}
         keyboardShouldPersistTaps="handled"
         bottomOffset={20}>
         {step === STEPS.SELECT && (

@@ -66,11 +66,14 @@ export function SelectVideoStep({ video, onSelectVideo }: SelectVideoStepProps) 
           <View className="aspect-video items-center rounded-xl border border-dashed border-gray-400 px-5 py-14">
             <MaterialIcons name="file-upload" size={48} color={colors.gray[400]} className="mb-4" />
             <AppText center className="w-9/12 text-gray-400">
-              Choose a video from your device to create a 5-second diary clip.
+              Pick a video longer than 5 seconds. You’ll select a 5-second moment next.
             </AppText>
           </View>
         </Pressable>
       )}
+      <AppText center className="mt-2 text-xs text-gray-300">
+        Minimum duration: 5 seconds
+      </AppText>
     </View>
   );
 }

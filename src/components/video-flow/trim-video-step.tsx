@@ -7,6 +7,7 @@ import { useState } from 'react';
 
 import { Scrubber } from '@/components/scrubber';
 import { VideoPlayer } from '@/components/video-player';
+import { CLIP_DURATION } from '@/constants/video-flow';
 import useThrottle from '@/hooks/use-throttle';
 
 type TrimVideoStepProps = {
@@ -29,7 +30,7 @@ export function TrimVideoStep({ video, startTime, onChangeStartTime }: TrimVideo
   useEventListener(player, 'timeUpdate', (event) => {
     const currentTime = event.currentTime;
 
-    if (currentTime >= startTime + 5) {
+    if (currentTime >= startTime + CLIP_DURATION) {
       // player.currentTime = startTime;
       player.pause();
     }

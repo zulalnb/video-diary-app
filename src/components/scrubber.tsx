@@ -3,6 +3,8 @@ import { View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
+
+import { CLIP_DURATION } from '@/constants/video-flow';
 import { AppText } from './app-text';
 
 const groupCount = 5;
@@ -20,7 +22,7 @@ type ScrubberProps = {
 export function Scrubber({
   startTime = 0,
   previewStartTime = 0,
-  duration = 5,
+  duration = CLIP_DURATION,
   videoDuration,
   onChange,
   onPreviewChange,

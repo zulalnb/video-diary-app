@@ -135,37 +135,22 @@ export default function HomeScreen() {
           headerLeft: () =>
             selectionMode ? (
               <Button
-                title={allSelected ? 'Unselect All' : 'Select All'}
+                title="Cancel"
                 variant="ghost"
-                onPress={handleToggleSelectAll}
-                icon={<MaterialIcons name="check-circle-outline" size={18} color="#6366f1" />}
+                textClassName="text-gray-800"
+                onPress={() => {
+                  setSelectionMode(false);
+                  setSelectedIds([]);
+                }}
               />
             ) : null,
-          headerRight: () =>
-            selectionMode ? (
-              <View className="flex-row items-center justify-center gap-0.5">
-                <Button
-                  variant="ghost"
-                  onPress={() => setVisibleModal(true)}
-                  icon={<MaterialIcons name="delete-outline" size={20} color={colors.red[500]} />}
-                />
-                <Button
-                  title="Cancel"
-                  variant="ghost"
-                  textClassName="text-gray-800"
-                  onPress={() => {
-                    setSelectionMode(false);
-                    setSelectedIds([]);
-                  }}
-                />
-              </View>
-            ) : (
-              <View className="flex items-center justify-center">
-                <Pressable onPress={() => router.push('/settings')}>
-                  <MaterialIcons name="settings" color={colors.black} size={24} />
-                </Pressable>
-              </View>
-            ),
+          headerRight: () => (
+            <Pressable
+              className="h-11 w-11 items-center justify-center"
+              onPress={() => router.push('/settings')}>
+              <MaterialIcons name="settings" color={colors.black} size={24} />
+            </Pressable>
+          ),
         }}
       />
       <AppView className="pb-safe flex-1 px-5 pt-5">
@@ -199,6 +184,28 @@ export default function HomeScreen() {
             <View className="items-center rounded-2xl bg-white px-6 py-5">
               <ActivityIndicator />
               <AppText className="mt-3 text-gray-600">Deleting selected videos...</AppText>
+            </View>
+          </View>
+        )}
+        {selectionMode && (
+          <View className="pb-safe absolute bottom-0 left-0 right-0 border-t border-gray-200 bg-white px-5 pt-3">
+            <View className="flex-row gap-3">
+              <View className="flex-1">
+                <Button
+                  icon={<MaterialIcons name="check-circle-outline" size={18} />}
+                  title={allSelected ? 'Unselect All' : 'Select All'}
+                  variant="secondary"
+                  onPress={handleToggleSelectAll}
+                />
+              </View>
+
+              <View className="flex-1">
+                <Button
+                  title={`Delete (${selectedIds.length})`}
+                  variant="destructive"
+                  onPress={() => setVisibleModal(true)}
+                />
+              </View>
             </View>
           </View>
         )}

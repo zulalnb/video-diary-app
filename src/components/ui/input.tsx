@@ -12,7 +12,7 @@ export function Input({ className, error, ...props }: InputProps) {
       {...props}
       textAlignVertical="center"
       className={cn(
-        'h-12 rounded-xl border border-gray-300 px-4 py-0 text-base leading-5 text-gray-900',
+        'h-12 rounded-xl border border-gray-300 px-4 py-0 text-base leading-5 text-gray-900 focus:border-indigo-500',
         error && 'border-red-500',
         className
       )}
