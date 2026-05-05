@@ -10,23 +10,10 @@ import { AppView } from '@/components/app-view';
 import { MetadataForm } from '@/components/metadata-form';
 import { Button } from '@/components/ui/button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { VideoDetailSkeleton } from '@/components/video-detail-skeleton';
 import { VideoPlayer } from '@/components/video-player';
 import { useUpdateVideo, useVideoById } from '@/hooks/use-videos';
 import { VideoMetadataFormValues, videoMetadataSchema } from '@/schemas/metadata';
-
-function VideoDetailSkeleton() {
-  return (
-    <AppView className="flex-1 px-5 pt-6">
-      <View className="aspect-video w-full rounded-2xl bg-gray-200" />
-      <View className="mt-6 w-full">
-        <View className="mb-3 h-7 w-2/3 rounded bg-gray-200" />
-        <View className="mb-2 h-4 w-full rounded bg-gray-200" />
-        <View className="mb-2 h-4 w-5/6 rounded bg-gray-200" />
-        <View className="mt-4 h-3 w-1/3 rounded bg-gray-200" />
-      </View>
-    </AppView>
-  );
-}
 
 export default function VideoDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

@@ -12,26 +12,11 @@ import { AppView } from '@/components/app-view';
 import { ConfirmModal } from '@/components/confirm-modal';
 import { Button } from '@/components/ui/button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { VideoDetailSkeleton } from '@/components/video-detail-skeleton';
 import { VideoPlayer } from '@/components/video-player';
 import { useDeleteVideo, useVideoById } from '@/hooks/use-videos';
 import { useSettingsStore } from '@/lib/settings-store';
 import colors from 'tailwindcss/colors';
-
-function VideoDetailSkeleton() {
-  return (
-    <AppView className="pb-safe flex-1 ">
-      <View className="aspect-video w-full rounded-2xl bg-gray-200" />
-      <View className="mt-6 w-full px-5">
-        <View className="mb-3 h-7 w-2/3 rounded bg-gray-200" />
-        <View className="mb-2 h-4 w-full rounded bg-gray-200" />
-        <View className="mb-2 h-4 w-5/6 rounded bg-gray-200" />
-        <View className="mt-4 h-3 w-1/3 rounded bg-gray-200" />
-        <View className="mt-4 h-3 w-1/3 rounded bg-gray-200" />
-        <View className="mt-4 h-3 w-1/3 rounded bg-gray-200" />
-      </View>
-    </AppView>
-  );
-}
 
 export default function VideoDetailScreen() {
   const [visibleModal, setVisibleModal] = useState(false);

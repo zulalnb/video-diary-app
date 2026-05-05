@@ -1,3 +1,4 @@
+import { format } from 'date-fns';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect } from 'react';
 import { Image, Pressable, PressableProps, View } from 'react-native';
@@ -28,12 +29,6 @@ export function VideoCard({
   selectionMode = false,
   ...props
 }: VideoCardProps) {
-  const formattedDate = new Date(createdAt).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-
   return (
     <Pressable
       className="relative h-56 overflow-hidden rounded-2xl shadow active:opacity-80"
@@ -77,7 +72,7 @@ export function VideoCard({
 
       {/* bottom metadata overlay */}
       <View className="absolute bottom-0 left-0 right-0 px-4 py-3">
-        <AppText className="text-sm text-white/80">{formattedDate}</AppText>
+        <AppText className="text-sm text-white/80">{format(createdAt, 'MMMM dd, yyyy')}</AppText>
 
         <AppText className="mt-0.5 text-base font-semibold text-white" numberOfLines={1}>
           {name}
