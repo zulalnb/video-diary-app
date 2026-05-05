@@ -1,7 +1,10 @@
+import { useEventListener } from 'expo';
+import { useVideoPlayer } from 'expo-video';
+
 import { MetadataForm } from '@/components/metadata-form';
 import { VideoPlayer } from '@/components/video-player';
+import { CLIP_DURATION } from '@/constants/video-flow';
 import type { PickedVideoAsset } from '@/types/video';
-import { useVideoPlayer } from 'expo-video';
 
 type MetadataStepProps = {
   video: PickedVideoAsset;
@@ -14,6 +17,15 @@ export function MetadataStep({ video, startTime }: MetadataStepProps) {
     player.loop = false;
     player.pause();
     player.timeUpdateEventInterval = 0.05;
+  });
+
+  useEventListener(player, 'timeUpdate', (event) => {
+    const currentTime = event.currentTime;
+
+    if (currentTime >= startTime + CLIP_DURATION) {
+      // player.currentTime = startTime;
+      player.pause();
+    }
   });
 
   return (

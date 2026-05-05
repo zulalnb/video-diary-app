@@ -76,7 +76,6 @@ function VideoPlayerView({
         className="h-full w-full"
         contentFit="contain"
         nativeControls={nativeControls}
-        surfaceType="textureView"
       />
 
       {!nativeControls && (
