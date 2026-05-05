@@ -163,7 +163,6 @@ The project follows a modular structure with clear separation of concerns:
 src/
 ├── app/                # Expo Router screens
 ├── components/         # Reusable UI components (video player, scrubber, inputs)
-├── features/           # Feature-based modules (video flow, metadata, etc.)
 ├── db/                 # Database schema and queries (Drizzle ORM)
 ├── validations/        # Zod schemas for form validation
 ├── hooks/              # Custom hooks (e.g., useThrottle)
