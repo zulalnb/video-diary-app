@@ -189,7 +189,7 @@ export default function HomeScreen() {
           </View>
         )}
         {selectionMode && (
-          <View className="pb-safe absolute bottom-0 left-0 right-0 border-t border-gray-200 bg-white px-5 pt-3">
+          <View className="absolute bottom-[calc(env(safe-area-inset-bottom)+6)] left-0 right-0 border-t border-gray-200 bg-white px-5 pt-3">
             <View className="flex-row gap-3">
               <View className="flex-1">
                 <Button

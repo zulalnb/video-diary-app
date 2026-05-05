@@ -1,5 +1,3 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-// import { trimVideo } from 'expo-trim-video';
 import { Video } from '@/db/schema';
 import {
   createVideo,
@@ -9,6 +7,8 @@ import {
   getVideoById,
   updateVideo,
 } from '@/queries/videos';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { trimVideo } from 'expo-trim-video';
 
 export function useCreateVideo() {
   const queryClient = useQueryClient();
@@ -117,9 +117,9 @@ export function useDeleteVideos() {
 }
 
 // Disabled in Expo Go. Real implementation works in development build.
-/* export function useTrimVideo() {
+export function useTrimVideo() {
   return useMutation({
     mutationFn: ({ uri, start, end }: { uri: string; start: number; end: number }) =>
       trimVideo({ uri, start, end }),
   });
-} */
+}

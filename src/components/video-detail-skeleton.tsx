@@ -3,8 +3,8 @@ import { AppView } from './app-view';
 
 export function VideoDetailSkeleton() {
   return (
-    <AppView className="pb-safe flex-1 ">
-      <View className="aspect-video w-full rounded-2xl bg-gray-200" />
+    <AppView className="pb-safe flex-1">
+      <View className="aspect-video w-full bg-gray-200" />
       <View className="mt-6 w-full px-5">
         <View className="mb-3 h-7 w-2/3 rounded bg-gray-200" />
         <View className="mb-2 h-4 w-full rounded bg-gray-200" />

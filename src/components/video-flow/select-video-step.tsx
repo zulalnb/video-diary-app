@@ -1,11 +1,13 @@
 import * as ImagePicker from 'expo-image-picker';
-import { Alert, Pressable, View } from 'react-native';
+import { useState } from 'react';
+import { ActivityIndicator, Alert, Pressable, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { Button } from '@/components/ui/button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { VideoPlayer } from '@/components/video-player';
 import { CLIP_DURATION } from '@/constants/video-flow';
+import { compressVideoIfNeeded } from '@/lib/video-compression';
 import type { PickedVideoAsset } from '@/types/video';
 import colors from 'tailwindcss/colors';
 
@@ -15,6 +17,8 @@ type SelectVideoStepProps = {
 };
 
 export function SelectVideoStep({ video, onSelectVideo }: SelectVideoStepProps) {
+  const [isPreparing, setIsPreparing] = useState(false);
+
   const pickVideo = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -29,16 +33,29 @@ export function SelectVideoStep({ video, onSelectVideo }: SelectVideoStepProps) 
     });
 
     if (result.canceled) return;
-
+    setIsPreparing(true);
     const pickedVideo = result.assets[0];
     const durationInSeconds = pickedVideo.duration ? pickedVideo.duration / 1000 : 0;
 
     if (durationInSeconds <= CLIP_DURATION) {
+      setIsPreparing(false);
       Alert.alert('Video is too short', 'Please choose a video longer than 5 seconds.');
       return;
     }
 
-    onSelectVideo(pickedVideo);
+    try {
+      const compressedUri = await compressVideoIfNeeded({
+        uri: pickedVideo.uri,
+        fileSize: pickedVideo.fileSize,
+      });
+
+      onSelectVideo({
+        ...pickedVideo,
+        uri: compressedUri,
+      });
+    } finally {
+      setIsPreparing(false);
+    }
   };
 
   return (
@@ -62,12 +79,22 @@ export function SelectVideoStep({ video, onSelectVideo }: SelectVideoStepProps) 
           </View>
         </View>
       ) : (
-        <Pressable onPress={pickVideo}>
-          <View className="aspect-video items-center rounded-xl border border-dashed border-gray-400 px-5 py-14">
+        <Pressable onPress={pickVideo} disabled={isPreparing}>
+          <View className="relative aspect-video items-center justify-center rounded-xl border border-dashed border-gray-400 px-5 py-14">
             <IconSymbol name="arrow.up.doc" size={48} color={colors.gray[400]} className="mb-2" />
             <AppText center className="w-9/12 text-gray-400">
               Pick a video longer than 5 seconds. You’ll select a 5-second moment next.
             </AppText>
+
+            {/* Loading overlay */}
+            {isPreparing && (
+              <View className="absolute inset-0 items-center justify-center rounded-xl bg-white/80">
+                <ActivityIndicator />
+                <AppText center className="mt-3 text-sm text-gray-500">
+                  Preparing video...
+                </AppText>
+              </View>
+            )}
           </View>
         </Pressable>
       )}

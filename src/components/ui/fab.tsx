@@ -14,7 +14,7 @@ export function Fab({ children, className, onPress, ...props }: FabProps) {
     <Pressable
       onPress={onPress}
       className={cn(
-        'absolute bottom-6 right-6 h-20 w-20 items-center justify-center rounded-full bg-indigo-500 shadow-lg',
+        'absolute bottom-[calc(env(safe-area-inset-bottom)+6)] right-6 h-20 w-20 items-center justify-center rounded-full bg-indigo-500 shadow-lg',
         className
       )}
       {...props}>

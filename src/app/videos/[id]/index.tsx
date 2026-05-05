@@ -1,6 +1,6 @@
-// import * as MediaLibrary from 'expo-media-library';
 import { format } from 'date-fns';
 import * as Haptics from 'expo-haptics';
+import * as MediaLibrary from 'expo-media-library';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useState } from 'react';
@@ -43,7 +43,7 @@ export default function VideoDetailScreen() {
   };
 
   // Disabled in Expo Go. Real implementation works in development build.
-  /* const saveVideoToGallery = async (uri: string) => {
+  const saveVideoToGallery = async (uri: string) => {
     const permission = await MediaLibrary.requestPermissionsAsync();
     if (!permission.granted) {
       Alert.alert('Permission required', 'Please allow access to save the video to your library.');
@@ -52,7 +52,7 @@ export default function VideoDetailScreen() {
     await MediaLibrary.saveToLibraryAsync(uri);
 
     Alert.alert('Saved', 'Video saved to your library.');
-  }; */
+  };
 
   const shareVideo = async (uri: string) => {
     const isAvailable = await Sharing.isAvailableAsync();
@@ -112,12 +112,12 @@ export default function VideoDetailScreen() {
                     <AppText>Edit</AppText>
                   </View>
                 </MenuOption>
-                {/*  <MenuOption onSelect={() => saveVideoToGallery(video.uri)}>
+                <MenuOption onSelect={() => saveVideoToGallery(video.uri)}>
                   <View className="flex-row items-center gap-3 px-3 py-2">
                     <IconSymbol name="square.and.arrow.down" size={20} color="black" />
                     <AppText>Save</AppText>
                   </View>
-                </MenuOption> */}
+                </MenuOption>
                 <MenuOption onSelect={() => shareVideo(video.uri)}>
                   <View className="flex-row items-center gap-3 px-3 py-2">
                     <IconSymbol name="square.and.arrow.up" size={20} color="black" />

@@ -7,8 +7,8 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { Alert, Keyboard, Platform, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
-import { Step, STEPS } from '@/constants/video-flow';
-import { useCreateVideo } from '@/hooks/use-videos';
+import { CLIP_DURATION, Step, STEPS } from '@/constants/video-flow';
+import { useCreateVideo, useTrimVideo } from '@/hooks/use-videos';
 import { videoMetadataSchema, type VideoMetadataFormValues } from '@/schemas/metadata';
 import type { PickedVideoAsset } from '@/types/video';
 
@@ -25,7 +25,7 @@ export default function ModalScreen() {
   const [startTime, setStartTime] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
 
-  // const trimVideoMutation = useTrimVideo();
+  const trimVideoMutation = useTrimVideo();
   const createVideo = useCreateVideo();
 
   const form = useForm<VideoMetadataFormValues>({
@@ -104,16 +104,16 @@ export default function ModalScreen() {
     setIsSaving(true);
 
     try {
-      /* const trimmed = await trimVideoMutation.mutateAsync({
+      const trimmed = await trimVideoMutation.mutateAsync({
         uri: video.uri,
         start: startTime,
         end: startTime + CLIP_DURATION,
-      }); */
+      });
 
-      const thumbnail = await generateThumbnail(video.uri);
+      const thumbnail = await generateThumbnail(trimmed.uri);
 
       const payload = {
-        uri: video.uri,
+        uri: trimmed.uri,
         thumbnail: thumbnail ?? '',
         name: values.name,
         description: values.description ?? '',
