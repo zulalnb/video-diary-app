@@ -3,8 +3,8 @@ import { useVideoPlayer, VideoView } from 'expo-video';
 import { Pressable, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { cn } from '@/lib/utils';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 type PlayerInstance = ReturnType<typeof useVideoPlayer>;
 
@@ -83,7 +83,7 @@ function VideoPlayerView({
         <Pressable onPress={togglePlay} className="absolute inset-0 items-center justify-center">
           <Animated.View style={animatedStyle}>
             <View className="h-14 w-14 items-center justify-center rounded-full bg-black/50">
-              <MaterialIcons name="play-arrow" size={36} color="white" />
+              <IconSymbol name="play.fill" size={36} color="white" />
             </View>
           </Animated.View>
         </Pressable>

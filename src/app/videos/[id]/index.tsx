@@ -1,5 +1,6 @@
 // import * as MediaLibrary from 'expo-media-library';
 import { format } from 'date-fns';
+import * as Haptics from 'expo-haptics';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useState } from 'react';
@@ -10,9 +11,10 @@ import { AppText } from '@/components/app-text';
 import { AppView } from '@/components/app-view';
 import { ConfirmModal } from '@/components/confirm-modal';
 import { Button } from '@/components/ui/button';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { VideoPlayer } from '@/components/video-player';
 import { useDeleteVideo, useVideoById } from '@/hooks/use-videos';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useSettingsStore } from '@/lib/settings-store';
 import colors from 'tailwindcss/colors';
 
 function VideoDetailSkeleton() {
@@ -38,11 +40,15 @@ export default function VideoDetailScreen() {
 
   const { data: video, isPending, error } = useVideoById(videoId);
   const deleteVideo = useDeleteVideo();
+  const { hapticsEnabled } = useSettingsStore();
 
   const handleDelete = () => {
     setVisibleModal(false);
     deleteVideo.mutate(videoId, {
       onSuccess: () => {
+        if (hapticsEnabled) {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        }
         router.back();
       },
       onError: () => {
@@ -79,9 +85,9 @@ export default function VideoDetailScreen() {
 
   if (error || !video) {
     return (
-      <AppView className="flex-1 items-center justify-center  px-6">
+      <AppView className="flex-1 items-center justify-center px-6">
         <View className="mb-5 h-16 w-16 items-center justify-center rounded-full bg-red-50">
-          <MaterialIcons name="error-outline" size={32} color="#ef4444" />
+          <IconSymbol name="exclamationmark.circle" size={32} color={colors.red[500]} />
         </View>
         <AppText center type="title" className="mb-2">
           Video not found
@@ -103,7 +109,7 @@ export default function VideoDetailScreen() {
             <Menu>
               <MenuTrigger disabled={deleteVideo.isPending}>
                 <View className="h-10 w-10 items-center justify-center rounded-full">
-                  <MaterialIcons name="more-vert" size={24} color="black" />
+                  <IconSymbol name="ellipsis" size={24} color="black" />
                 </View>
               </MenuTrigger>
 
@@ -117,25 +123,25 @@ export default function VideoDetailScreen() {
                 }}>
                 <MenuOption onSelect={() => router.push(`/videos/${id}/edit`)}>
                   <View className="flex-row items-center gap-3 px-3 py-2">
-                    <MaterialIcons name="edit" size={20} color="black" />
+                    <IconSymbol name="pencil" size={20} color="black" />
                     <AppText>Edit</AppText>
                   </View>
                 </MenuOption>
                 {/*  <MenuOption onSelect={() => saveVideoToGallery(video.uri)}>
                   <View className="flex-row items-center gap-3 px-3 py-2">
-                    <MaterialIcons name="file-download" size={20} color="black" />
+                    <IconSymbol name="square.and.arrow.down" size={20} color="black" />
                     <AppText>Save</AppText>
                   </View>
                 </MenuOption> */}
                 <MenuOption onSelect={() => shareVideo(video.uri)}>
                   <View className="flex-row items-center gap-3 px-3 py-2">
-                    <MaterialIcons name="share" size={20} color="black" />
+                    <IconSymbol name="square.and.arrow.up" size={20} color="black" />
                     <AppText>Share</AppText>
                   </View>
                 </MenuOption>
                 <MenuOption onSelect={() => setVisibleModal(true)}>
                   <View className="flex-row items-center gap-3 px-3 py-2">
-                    <MaterialIcons name="delete-outline" size={20} color={colors.red[500]} />
+                    <IconSymbol name="trash" size={20} color="#ef4444" />
                     <AppText className="text-red-500">Delete</AppText>
                   </View>
                 </MenuOption>
@@ -144,7 +150,10 @@ export default function VideoDetailScreen() {
           ),
         }}
       />
-      <ScrollView className="flex-1" contentContainerClassName="pb-safe">
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="pb-safe"
+        showsVerticalScrollIndicator={false}>
         <VideoPlayer uri={video.uri} className="rounded-none" />
 
         <View className="mt-6 px-5">

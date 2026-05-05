@@ -10,10 +10,7 @@ import migrations from '@/drizzle/migrations';
 function DrizzleStudio() {
   const db = useSQLiteContext();
 
-  if (__DEV__) {
-    useDrizzleStudio(db);
-  }
-
+  useDrizzleStudio(db);
   return null;
 }
 
@@ -30,7 +27,7 @@ export default function DatabaseProvider(props: DatabaseProviderProps) {
         databaseName={DATABASE_NAME}
         options={{ enableChangeListener: true }}
         useSuspense>
-        <DrizzleStudio />
+        {__DEV__ && <DrizzleStudio />}
         {props.children}
       </SQLiteProvider>
     </Suspense>

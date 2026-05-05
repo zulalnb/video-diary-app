@@ -13,11 +13,11 @@ import { videoMetadataSchema, type VideoMetadataFormValues } from '@/schemas/met
 import type { PickedVideoAsset } from '@/types/video';
 
 import { Button } from '@/components/ui/button';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { MetadataStep } from '@/components/video-flow/metadata-step';
 import { SelectVideoStep } from '@/components/video-flow/select-video-step';
 import { TrimVideoStep } from '@/components/video-flow/trim-video-step';
 import { cn } from '@/lib/utils';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function ModalScreen() {
   const [step, setStep] = useState<Step>(STEPS.SELECT);
@@ -149,7 +149,7 @@ export default function ModalScreen() {
                 disabled={isSaving}
                 variant="ghost"
                 onPress={() => router.dismissTo('/')}
-                icon={<MaterialIcons name="close" color="black" size={24} />}
+                icon={<IconSymbol name="xmark" color="black" size={24} />}
               />
             ) : null,
           headerRight: () =>
@@ -215,7 +215,7 @@ export default function ModalScreen() {
               title={`Next: ${step === STEPS.SELECT ? 'Crop Video' : 'Add Details'}`}
               disabled={!video}
               onPress={handleNext}
-              icon={<MaterialIcons name="navigate-next" color="white" size={24} />}
+              icon={<IconSymbol name="chevron.right" color="white" size={24} />}
               iconPosition="end"
               className="h-12"
             />

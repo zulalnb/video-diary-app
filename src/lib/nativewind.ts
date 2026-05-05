@@ -1,5 +1,7 @@
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
+import { SymbolView } from 'expo-symbols';
 import { VideoView } from 'expo-video';
 import { cssInterop } from 'nativewind';
 import { TextInput } from 'react-native';
@@ -29,6 +31,21 @@ cssInterop(TextInput, {
 });
 
 cssInterop(LinearGradient, {
+  className: {
+    target: 'style',
+  },
+});
+
+cssInterop(SymbolView, {
+  className: {
+    target: 'style',
+    nativeStyleToProp: {
+      color: 'tintColor',
+    },
+  },
+});
+
+cssInterop(MaterialIcons, {
   className: {
     target: 'style',
   },

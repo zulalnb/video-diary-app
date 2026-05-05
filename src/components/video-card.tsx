@@ -9,9 +9,9 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { AppText } from '@/components/app-text';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import type { Video } from '@/db/schema';
 import { cn } from '@/lib/utils';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 type VideoCardProps = Pick<Video, 'name' | 'thumbnail'> &
   PressableProps & {
@@ -61,7 +61,7 @@ export function VideoCard({
               'absolute left-3 top-3 h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-black/40',
               selected && 'border-transparent bg-indigo-500'
             )}>
-            {selected && <MaterialIcons name="check" size={18} color="white" />}
+            {selected && <IconSymbol name="checkmark" size={18} color="white" />}
           </View>
         </View>
       )}
@@ -70,7 +70,7 @@ export function VideoCard({
       {!selectionMode && (
         <View className="absolute inset-0 items-center justify-center">
           <View className="h-14 w-14 items-center justify-center rounded-full bg-slate-200/20">
-            <MaterialIcons name="play-arrow" size={40} color="white" />
+            <IconSymbol name="play.fill" size={40} color="white" />
           </View>
         </View>
       )}

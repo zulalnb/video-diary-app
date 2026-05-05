@@ -9,10 +9,10 @@ import { AppText } from '@/components/app-text';
 import { AppView } from '@/components/app-view';
 import { MetadataForm } from '@/components/metadata-form';
 import { Button } from '@/components/ui/button';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { VideoPlayer } from '@/components/video-player';
 import { useUpdateVideo, useVideoById } from '@/hooks/use-videos';
 import { VideoMetadataFormValues, videoMetadataSchema } from '@/schemas/metadata';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 function VideoDetailSkeleton() {
   return (
@@ -88,7 +88,7 @@ export default function VideoDetailScreen() {
     return (
       <AppView className="flex-1 items-center justify-center px-6">
         <View className="mb-5 h-16 w-16 items-center justify-center rounded-full bg-red-50">
-          <MaterialIcons name="error-outline" size={32} color="#ef4444" />
+          <IconSymbol name="exclamationmark.circle" size={32} color="#ef4444" />
         </View>
         <AppText center type="title" className="mb-2">
           Video not found

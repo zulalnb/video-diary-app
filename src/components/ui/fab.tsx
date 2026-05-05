@@ -1,7 +1,7 @@
-import Icon from '@expo/vector-icons/MaterialIcons';
 import { ReactNode } from 'react';
 import { Pressable, PressableProps } from 'react-native';
 
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { cn } from '@/lib/utils';
 
 type FabProps = PressableProps & {
@@ -18,7 +18,7 @@ export function Fab({ children, className, onPress, ...props }: FabProps) {
         className
       )}
       {...props}>
-      {children ?? <Icon name="add" size={30} color="white" />}
+      {children ?? <IconSymbol name="plus" size={30} color="white" />}
     </Pressable>
   );
 }

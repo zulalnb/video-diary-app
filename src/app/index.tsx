@@ -1,19 +1,19 @@
 import * as Haptics from 'expo-haptics';
 import { Link, router, Stack } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Pressable, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { AppView } from '@/components/app-view';
 import { ConfirmModal } from '@/components/confirm-modal';
 import { Button } from '@/components/ui/button';
 import { Fab } from '@/components/ui/fab';
+import { IconButton } from '@/components/ui/icon-button';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { VideoCard, VideoCardSkeleton } from '@/components/video-card';
 import { Video } from '@/db/schema';
 import { useDeleteVideos, useVideos } from '@/hooks/use-videos';
 import { useSettingsStore } from '@/lib/settings-store';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import colors from 'tailwindcss/colors';
 
 export default function HomeScreen() {
   const [visibleModal, setVisibleModal] = useState(false);
@@ -36,15 +36,16 @@ export default function HomeScreen() {
   };
 
   const handleDelete = () => {
+    setVisibleModal(false);
     deleteVideos.mutate(selectedIds, {
       onSuccess: () => {
-        refetch();
+        if (hapticsEnabled) {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        }
         setSelectionMode(false);
         setSelectedIds([]);
-        setVisibleModal(false);
       },
       onError: () => {
-        setVisibleModal(false);
         Alert.alert('Delete failed', 'Something went wrong. Please try again.');
       },
     });
@@ -83,7 +84,7 @@ export default function HomeScreen() {
     return (
       <AppView className="flex-1 items-center justify-center px-6">
         <View className="mb-5 h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-          <MaterialIcons name="error-outline" size={32} color="#6b7280" />
+          <IconSymbol name="exclamationmark.circle" size={32} color="#6b7280" />
         </View>
         <AppText center type="title" className="mb-2">
           Something went wrong
@@ -100,7 +101,7 @@ export default function HomeScreen() {
     return (
       <AppView className="pb-safe flex-1 items-center px-6 pt-40">
         <View className="mb-5 h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-          <MaterialIcons name="videocam-off" size={48} color="#6b7280" />
+          <IconSymbol name="video.slash" size={48} color="#6b7280" />
         </View>
         <AppText center type="title" className="mb-2">
           No videos yet
@@ -145,19 +146,19 @@ export default function HomeScreen() {
               />
             ) : null,
           headerRight: () => (
-            <Pressable
-              className="h-11 w-11 items-center justify-center"
-              onPress={() => router.push('/settings')}>
-              <MaterialIcons name="settings" color={colors.black} size={24} />
-            </Pressable>
+            <IconButton
+              icon={<IconSymbol name="gearshape" color="black" size={24} />}
+              onPress={() => router.push('/settings')}
+            />
           ),
         }}
       />
-      <AppView className="pb-safe flex-1 px-5 pt-5">
+      <AppView className="flex-1 px-5 pt-5">
         <FlatList
           data={videos}
           keyExtractor={(item) => item.id.toString()}
-          contentContainerClassName="gap-6"
+          contentContainerClassName="gap-6 pb-safe"
+          showsVerticalScrollIndicator={false}
           renderItem={renderVideoCard}
           refreshing={isRefetching}
           onRefresh={refetch}
@@ -192,7 +193,7 @@ export default function HomeScreen() {
             <View className="flex-row gap-3">
               <View className="flex-1">
                 <Button
-                  icon={<MaterialIcons name="check-circle-outline" size={18} />}
+                  icon={<IconSymbol name="checkmark.circle" color="#1f2937" size={18} />}
                   title={allSelected ? 'Unselect All' : 'Select All'}
                   variant="secondary"
                   onPress={handleToggleSelectAll}
