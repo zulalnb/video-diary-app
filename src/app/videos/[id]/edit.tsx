@@ -13,7 +13,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { VideoDetailSkeleton } from '@/components/video-detail-skeleton';
 import { VideoPlayer } from '@/components/video-player';
 import { useUpdateVideo, useVideoById } from '@/hooks/use-videos';
-import { VideoMetadataFormValues, videoMetadataSchema } from '@/schemas/metadata';
+import { VideoMetadataFormValues, videoMetadataSchema } from '@/validations/metadata';
 
 export default function VideoDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

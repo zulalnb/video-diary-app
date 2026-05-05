@@ -9,8 +9,8 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
 import { CLIP_DURATION, Step, STEPS } from '@/constants/video-flow';
 import { useCreateVideo, useTrimVideo } from '@/hooks/use-videos';
-import { videoMetadataSchema, type VideoMetadataFormValues } from '@/schemas/metadata';
 import type { PickedVideoAsset } from '@/types/video';
+import { videoMetadataSchema, type VideoMetadataFormValues } from '@/validations/metadata';
 
 import { Button } from '@/components/ui/button';
 import { IconSymbol } from '@/components/ui/icon-symbol';

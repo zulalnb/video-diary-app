@@ -4,7 +4,7 @@ import { Text, View } from 'react-native';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { VideoMetadataFormValues } from '@/schemas/metadata';
+import { VideoMetadataFormValues } from '@/validations/metadata';
 
 export function MetadataForm() {
   const { control } = useFormContext<VideoMetadataFormValues>();
