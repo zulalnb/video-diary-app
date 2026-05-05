@@ -6,16 +6,9 @@ import { useVideoPlayer } from 'expo-video';
 type MetadataStepProps = {
   video: PickedVideoAsset;
   startTime: number;
-  isSubmitting?: boolean;
-  onSubmit: () => void;
 };
 
-export function MetadataStep({
-  video,
-  startTime,
-  isSubmitting = false,
-  onSubmit,
-}: MetadataStepProps) {
+export function MetadataStep({ video, startTime }: MetadataStepProps) {
   const player = useVideoPlayer(video.uri, (player) => {
     player.currentTime = startTime;
     player.loop = false;
@@ -32,7 +25,7 @@ export function MetadataStep({
         playFrom={startTime}
         nativeControls={false}
       />
-      <MetadataForm isSubmitting={isSubmitting} onSubmit={onSubmit} />
+      <MetadataForm />
     </>
   );
 }

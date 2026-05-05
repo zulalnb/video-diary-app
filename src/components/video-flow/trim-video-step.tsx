@@ -1,14 +1,13 @@
-import { View } from 'react-native';
-
-import type { PickedVideoAsset } from '@/types/video';
 import { useEventListener } from 'expo';
 import { useVideoPlayer } from 'expo-video';
 import { useState } from 'react';
+import { View } from 'react-native';
 
 import { Scrubber } from '@/components/scrubber';
 import { VideoPlayer } from '@/components/video-player';
 import { CLIP_DURATION } from '@/constants/video-flow';
 import useThrottle from '@/hooks/use-throttle';
+import type { PickedVideoAsset } from '@/types/video';
 
 type TrimVideoStepProps = {
   video: PickedVideoAsset;

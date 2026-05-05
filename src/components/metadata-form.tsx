@@ -6,12 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { VideoMetadataFormValues } from '@/schemas/metadata';
 
-type MetadataFormProps = {
-  isSubmitting?: boolean;
-  onSubmit?: () => void;
-};
-
-export function MetadataForm({ isSubmitting = false, onSubmit }: MetadataFormProps) {
+export function MetadataForm() {
   const { control } = useFormContext<VideoMetadataFormValues>();
 
   return (
@@ -53,13 +48,6 @@ export function MetadataForm({ isSubmitting = false, onSubmit }: MetadataFormPro
           </Field>
         )}
       />
-
-      {/*  <Button
-        title={isSubmitting ? 'Saving...' : 'Save'}
-        loading={isSubmitting}
-        disabled={isSubmitting}
-        onPress={onSubmit}
-      /> */}
     </View>
   );
 }

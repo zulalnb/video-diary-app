@@ -177,14 +177,7 @@ export default function ModalScreen() {
         {step === STEPS.TRIM && video && (
           <TrimVideoStep video={video} startTime={startTime} onChangeStartTime={setStartTime} />
         )}
-        {step === STEPS.METADATA && video && (
-          <MetadataStep
-            video={video}
-            startTime={startTime}
-            isSubmitting={isSaving}
-            onSubmit={form.handleSubmit(handleSave)}
-          />
-        )}
+        {step === STEPS.METADATA && video && <MetadataStep video={video} startTime={startTime} />}
       </KeyboardAwareScrollView>
       <View className="flex-row items-center gap-3 px-5 pb-[calc(env(safe-area-inset-bottom)+20)]">
         {step !== STEPS.SELECT && (
