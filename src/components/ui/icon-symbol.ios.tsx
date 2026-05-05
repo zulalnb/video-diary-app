@@ -1,26 +1,6 @@
 import { SymbolView, SymbolViewProps, SymbolWeight } from 'expo-symbols';
 import { OpaqueColorValue, StyleProp, ViewStyle } from 'react-native';
 
-type IconSymbolName =
-  | 'house.fill'
-  | 'paperplane.fill'
-  | 'chevron.left.forwardslash.chevron.right'
-  | 'chevron.right'
-  | 'xmark'
-  | 'exclamationmark.circle'
-  | 'video.slash'
-  | 'gearshape'
-  | 'checkmark.circle'
-  | 'arrow.up.doc'
-  | 'play.fill'
-  | 'ellipsis'
-  | 'pencil'
-  | 'square.and.arrow.down'
-  | 'square.and.arrow.up'
-  | 'trash'
-  | 'checkmark'
-  | 'plus';
-
 export function IconSymbol({
   name,
   size = 24,

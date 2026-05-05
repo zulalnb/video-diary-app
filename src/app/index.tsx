@@ -13,7 +13,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { VideoCard, VideoCardSkeleton } from '@/components/video-card';
 import { Video } from '@/db/schema';
 import { useDeleteVideos, useVideos } from '@/hooks/use-videos';
-import { useSettingsStore } from '@/lib/settings-store';
+import { useSettingsStore } from '@/stores/settings-store';
 
 export default function HomeScreen() {
   const [visibleModal, setVisibleModal] = useState(false);

@@ -4,7 +4,7 @@ import { Switch, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { AppView } from '@/components/app-view';
-import { useSettingsStore } from '@/lib/settings-store';
+import { useSettingsStore } from '@/stores/settings-store';
 import colors from 'tailwindcss/colors';
 
 export default function SettingsScreen() {

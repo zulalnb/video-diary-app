@@ -15,7 +15,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { VideoDetailSkeleton } from '@/components/video-detail-skeleton';
 import { VideoPlayer } from '@/components/video-player';
 import { useDeleteVideo, useVideoById } from '@/hooks/use-videos';
-import { useSettingsStore } from '@/lib/settings-store';
+import { useSettingsStore } from '@/stores/settings-store';
 import colors from 'tailwindcss/colors';
 
 export default function VideoDetailScreen() {
