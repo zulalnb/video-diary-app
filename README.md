@@ -54,6 +54,10 @@ Handling large video files caused performance issues on Android during preview. 
 - UI updates are minimized to prevent frame drops
 - Preview uses a processed video to ensure smoother interaction
 
+- **Device-aware behavior (simulator vs real device)**  
+  Some video processing operations (such as compression) may behave differently on simulators compared to physical devices.  
+  To ensure reliable results, a device check is implemented using `expo-device`, and critical functionality like video compression was validated on real hardware.
+
 ---
 
 ### 🎚 Custom Scrubber (Reanimated + Gesture Handler)
