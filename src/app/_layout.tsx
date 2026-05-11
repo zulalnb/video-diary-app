@@ -8,6 +8,7 @@ import 'react-native-reanimated';
 import DatabaseProvider from '@/providers/database-provider';
 import QueryProvider from '@/providers/query-provider';
 
+import { Toast } from '@/components/ui/toast';
 import '@/global.css';
 import '@/lib/nativewind';
 
@@ -47,6 +48,7 @@ export default function RootLayout() {
                   }}
                 />
               </Stack>
+              <Toast />
               <StatusBar style="dark" />
             </QueryProvider>
           </DatabaseProvider>

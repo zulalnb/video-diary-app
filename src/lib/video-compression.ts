@@ -14,7 +14,6 @@ export async function compressVideoIfNeeded({
   if (!shouldCompress) {
     return uri;
   }
-
   return VideoCompressor.compress(uri, {
     compressionMethod: 'auto',
   });

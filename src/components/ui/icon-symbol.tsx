@@ -20,6 +20,8 @@ const MAPPING = {
   'chevron.right': 'chevron-right',
   xmark: 'close',
   'exclamationmark.circle': 'error-outline',
+  'exclamationmark.triangle': 'warning-amber',
+  'info.circle': 'info-outline',
   'video.slash': 'videocam-off',
   gearshape: 'settings',
   'checkmark.circle': 'check-circle-outline',

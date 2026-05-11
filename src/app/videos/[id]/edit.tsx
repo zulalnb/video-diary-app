@@ -14,6 +14,7 @@ import { VideoDetailSkeleton } from '@/components/video-detail-skeleton';
 import { VideoPlayer } from '@/components/video-player';
 import { useUpdateVideo, useVideoById } from '@/hooks/use-videos';
 import { VideoMetadataFormValues, videoMetadataSchema } from '@/validations/metadata';
+import Toast from 'react-native-toast-message';
 
 export default function VideoDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -34,22 +35,25 @@ export default function VideoDetailScreen() {
     },
   });
 
-  usePreventRemove(form.formState.isDirty && !form.formState.isSubmitted, ({ data }) => {
-    Keyboard.dismiss();
-    Alert.alert(
-      'Discard changes?',
-      'Your changes will be lost.',
+  usePreventRemove(
+    form.formState.isDirty && !updateVideo.isPending && !updateVideo.isSuccess,
+    ({ data }) => {
+      Keyboard.dismiss();
+      Alert.alert(
+        'Discard changes?',
+        'Your changes will be lost.',
 
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Discard',
-          style: 'destructive',
-          onPress: () => navigation.dispatch(data.action),
-        },
-      ]
-    );
-  });
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Discard',
+            style: 'destructive',
+            onPress: () => navigation.dispatch(data.action),
+          },
+        ]
+      );
+    }
+  );
 
   const handleSave = async (values: VideoMetadataFormValues) => {
     Keyboard.dismiss();
@@ -58,10 +62,19 @@ export default function VideoDetailScreen() {
       { id: Number(id), video: values },
       {
         onSuccess: () => {
+          Toast.show({
+            type: 'success',
+            text1: 'Your changes saved.',
+            visibilityTime: 2000,
+          });
           router.back();
         },
         onError: () => {
-          Alert.alert('Update failed', 'Something went wrong. Please try again.');
+          Toast.show({
+            type: 'error',
+            text1: 'Your changes could not be saved.',
+            visibilityTime: 3500,
+          });
         },
       }
     );

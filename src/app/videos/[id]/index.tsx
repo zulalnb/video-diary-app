@@ -4,8 +4,9 @@ import * as MediaLibrary from 'expo-media-library';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Platform, ScrollView, View } from 'react-native';
 import { Menu, MenuOption, MenuOptions, MenuTrigger } from 'react-native-popup-menu';
+import Toast from 'react-native-toast-message';
 
 import { AppText } from '@/components/app-text';
 import { AppView } from '@/components/app-view';
@@ -35,33 +36,90 @@ export default function VideoDetailScreen() {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         }
         router.back();
+        Toast.show({
+          type: 'success',
+          text1: 'Video deleted.',
+          visibilityTime: 2000,
+        });
       },
       onError: () => {
-        Alert.alert('Delete failed', 'Something went wrong. Please try again.');
+        Toast.show({
+          type: 'error',
+          text1: 'Video could not be deleted.',
+          visibilityTime: 3500,
+        });
       },
     });
   };
 
   // Disabled in Expo Go. Real implementation works in development build.
   const saveVideoToGallery = async (uri: string) => {
-    const permission = await MediaLibrary.requestPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert('Permission required', 'Please allow access to save the video to your library.');
-      return;
-    }
-    await MediaLibrary.saveToLibraryAsync(uri);
+    try {
+      if (Platform.OS === 'ios') {
+        const permission = await MediaLibrary.requestPermissionsAsync();
 
-    Alert.alert('Saved', 'Video saved to your library.');
+        if (!permission.granted) {
+          Alert.alert(
+            'Photo access needed',
+            'Go to your device settings to allow access to photos.',
+            [
+              {
+                text: 'Cancel',
+                style: 'cancel',
+              },
+              {
+                text: 'Open Settings',
+                onPress: () => Linking.openSettings(),
+              },
+            ]
+          );
+
+          return;
+        }
+      }
+
+      await MediaLibrary.saveToLibraryAsync(uri);
+
+      Toast.show({
+        type: 'success',
+        text1: 'Video saved to your library.',
+        visibilityTime: 2000,
+      });
+    } catch (error) {
+      console.error('Save to gallery failed:', error);
+
+      Toast.show({
+        type: 'error',
+        text1: 'Video could not be saved to your library.',
+        visibilityTime: 3500,
+      });
+    }
   };
 
   const shareVideo = async (uri: string) => {
-    const isAvailable = await Sharing.isAvailableAsync();
-    if (!isAvailable) {
-      Alert.alert('Sharing unavailable', 'Sharing is not available on this device.');
-      return;
-    }
+    try {
+      const isAvailable = await Sharing.isAvailableAsync();
 
-    await Sharing.shareAsync(uri);
+      if (!isAvailable) {
+        Toast.show({
+          type: 'error',
+          text1: 'Sharing is not available on this device.',
+          visibilityTime: 3500,
+        });
+
+        return;
+      }
+
+      await Sharing.shareAsync(uri);
+    } catch (error) {
+      console.error('Share failed:', error);
+
+      Toast.show({
+        type: 'error',
+        text1: 'Video could not be shared.',
+        visibilityTime: 3500,
+      });
+    }
   };
 
   if (isPending) {

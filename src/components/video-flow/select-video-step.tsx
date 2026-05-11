@@ -1,8 +1,9 @@
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
+import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { VideoPlayer } from '@/components/video-player';
@@ -18,32 +19,35 @@ type SelectVideoStepProps = {
 
 export function SelectVideoStep({ video, onSelectVideo }: SelectVideoStepProps) {
   const [isPreparing, setIsPreparing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const pickVideo = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (!permissionResult.granted) {
-      Alert.alert('Permission required', 'Permission to access the media library is required.');
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['videos'],
-      quality: 0.5,
-    });
-
-    if (result.canceled) return;
-    setIsPreparing(true);
-    const pickedVideo = result.assets[0];
-    const durationInSeconds = pickedVideo.duration ? pickedVideo.duration / 1000 : 0;
-
-    if (durationInSeconds <= CLIP_DURATION) {
-      setIsPreparing(false);
-      Alert.alert('Video is too short', 'Please choose a video longer than 5 seconds.');
-      return;
-    }
-
     try {
+      setErrorMessage(null);
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['videos'],
+        quality: 0.5,
+      });
+
+      if (result.canceled) return;
+
+      setIsPreparing(true);
+
+      const pickedVideo = result.assets[0];
+
+      if (!pickedVideo) {
+        setErrorMessage('Video could not be selected. Please try again.');
+        return;
+      }
+
+      const durationInSeconds = pickedVideo?.duration ? pickedVideo.duration / 1000 : 0;
+
+      if (durationInSeconds <= CLIP_DURATION) {
+        setErrorMessage('Please choose a video longer than 5 seconds.');
+        return;
+      }
+
       const compressedUri = await compressVideoIfNeeded({
         uri: pickedVideo.uri,
         fileSize: pickedVideo.fileSize,
@@ -53,6 +57,10 @@ export function SelectVideoStep({ video, onSelectVideo }: SelectVideoStepProps) 
         ...pickedVideo,
         uri: compressedUri,
       });
+    } catch (error) {
+      console.error('Failed to prepare video:', error);
+
+      setErrorMessage('The video could not be prepared. Please try another video.');
     } finally {
       setIsPreparing(false);
     }
@@ -63,6 +71,7 @@ export function SelectVideoStep({ video, onSelectVideo }: SelectVideoStepProps) 
       {video ? (
         <View>
           <VideoPlayer uri={video.uri} />
+
           <View className="mt-4 flex-row gap-4">
             <Button
               title="Change"
@@ -70,6 +79,7 @@ export function SelectVideoStep({ video, onSelectVideo }: SelectVideoStepProps) 
               onPress={pickVideo}
               className="mt-5 flex-1"
             />
+
             <Button
               title="Remove"
               variant="destructive"
@@ -82,14 +92,15 @@ export function SelectVideoStep({ video, onSelectVideo }: SelectVideoStepProps) 
         <Pressable onPress={pickVideo} disabled={isPreparing}>
           <View className="relative aspect-video items-center justify-center rounded-xl border border-dashed border-gray-400 px-5 py-14">
             <IconSymbol name="arrow.up.doc" size={48} color={colors.gray[400]} className="mb-2" />
+
             <AppText center className="w-9/12 text-gray-400">
               Pick a video longer than 5 seconds. You’ll select a 5-second moment next.
             </AppText>
 
-            {/* Loading overlay */}
             {isPreparing && (
               <View className="absolute inset-0 items-center justify-center rounded-xl bg-white/80">
                 <ActivityIndicator />
+
                 <AppText center className="mt-3 text-sm text-gray-500">
                   Preparing video...
                 </AppText>
@@ -98,9 +109,12 @@ export function SelectVideoStep({ video, onSelectVideo }: SelectVideoStepProps) 
           </View>
         </Pressable>
       )}
+
       <AppText center className="mt-2 text-sm text-gray-600">
         Minimum duration: 5 seconds
       </AppText>
+
+      {errorMessage && <Alert variant="error" message={errorMessage} />}
     </View>
   );
 }

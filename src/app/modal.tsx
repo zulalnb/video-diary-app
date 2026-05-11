@@ -1,7 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { usePreventRemove } from '@react-navigation/native';
 import { router, Stack, useNavigation } from 'expo-router';
-import * as VideoThumbnails from 'expo-video-thumbnails';
 import { useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { Alert, Keyboard, Platform, View } from 'react-native';
@@ -12,20 +11,23 @@ import { useCreateVideo, useTrimVideo } from '@/hooks/use-videos';
 import type { PickedVideoAsset } from '@/types/video';
 import { videoMetadataSchema, type VideoMetadataFormValues } from '@/validations/metadata';
 
+import { Alert as InlineAlert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { MetadataStep } from '@/components/video-flow/metadata-step';
 import { SelectVideoStep } from '@/components/video-flow/select-video-step';
 import { TrimVideoStep } from '@/components/video-flow/trim-video-step';
-import { cn } from '@/lib/utils';
+import { cn, generateThumbnail } from '@/lib/utils';
+import Toast from 'react-native-toast-message';
 
 export default function ModalScreen() {
   const [step, setStep] = useState<Step>(STEPS.SELECT);
   const [video, setVideo] = useState<PickedVideoAsset | null>(null);
   const [startTime, setStartTime] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
+  const [saveErrorMessage, setSaveErrorMessage] = useState<string | null>(null);
 
-  const trimVideoMutation = useTrimVideo();
+  const trimVideo = useTrimVideo();
   const createVideo = useCreateVideo();
 
   const form = useForm<VideoMetadataFormValues>({
@@ -38,7 +40,7 @@ export default function ModalScreen() {
 
   const navigation = useNavigation();
 
-  const shouldPreventClose = form.formState.isDirty && !isSaving && !form.formState.isSubmitted;
+  const shouldPreventClose = form.formState.isDirty && !isSaving && !createVideo.isSuccess;
 
   usePreventRemove(shouldPreventClose, ({ data }) => {
     Keyboard.dismiss();
@@ -57,6 +59,7 @@ export default function ModalScreen() {
 
   const handleSelectVideo = (selectedVideo: PickedVideoAsset | null) => {
     setVideo(selectedVideo);
+    setSaveErrorMessage(null);
     setStartTime(0);
     form.reset();
   };
@@ -68,6 +71,7 @@ export default function ModalScreen() {
     }
 
     if (step === STEPS.TRIM) {
+      setSaveErrorMessage(null);
       setStep(STEPS.METADATA);
     }
   };
@@ -79,6 +83,7 @@ export default function ModalScreen() {
     }
 
     if (step === STEPS.TRIM) {
+      setSaveErrorMessage(null);
       setStep(STEPS.SELECT);
       return;
     }
@@ -86,25 +91,13 @@ export default function ModalScreen() {
     router.dismissTo('/');
   };
 
-  const generateThumbnail = async (video: string) => {
-    try {
-      const { uri } = await VideoThumbnails.getThumbnailAsync(video, {
-        time: 1000,
-      });
-      return uri;
-    } catch (e) {
-      console.warn(e);
-    }
-  };
-
   const handleSave = async (values: VideoMetadataFormValues) => {
     Keyboard.dismiss();
     if (!video) return;
-
     setIsSaving(true);
-
+    setSaveErrorMessage(null);
     try {
-      const trimmed = await trimVideoMutation.mutateAsync({
+      const trimmed = await trimVideo.mutateAsync({
         uri: video.uri,
         start: startTime,
         end: startTime + CLIP_DURATION,
@@ -118,17 +111,18 @@ export default function ModalScreen() {
         name: values.name,
         description: values.description ?? '',
       };
-
-      createVideo.mutate(payload, {
-        onSuccess: () => {
-          router.dismissTo('/');
-        },
-        onSettled() {
-          setIsSaving(false);
-        },
+      await createVideo.mutateAsync(payload);
+      Toast.show({
+        type: 'success',
+        text1: 'Moment saved',
       });
+
+      router.dismissTo('/');
     } catch (error) {
       console.error('Video save failed:', error);
+
+      setSaveErrorMessage('Your video could not be saved. Please try again.');
+    } finally {
       setIsSaving(false);
     }
   };
@@ -179,6 +173,11 @@ export default function ModalScreen() {
         )}
         {step === STEPS.METADATA && video && <MetadataStep video={video} startTime={startTime} />}
       </KeyboardAwareScrollView>
+      {step === STEPS.METADATA && saveErrorMessage && (
+        <View className="px-5 pb-3">
+          <InlineAlert variant="error" message={saveErrorMessage} />
+        </View>
+      )}
       <View className="flex-row items-center gap-3 px-5 pb-[calc(env(safe-area-inset-bottom)+20)]">
         {step !== STEPS.SELECT && (
           <View className="flex-1">

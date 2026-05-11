@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { Link, router, Stack } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, View } from 'react-native';
+import { ActivityIndicator, FlatList, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { AppView } from '@/components/app-view';
@@ -14,6 +14,7 @@ import { VideoCard, VideoCardSkeleton } from '@/components/video-card';
 import { Video } from '@/db/schema';
 import { useDeleteVideos, useVideos } from '@/hooks/use-videos';
 import { useSettingsStore } from '@/stores/settings-store';
+import Toast from 'react-native-toast-message';
 
 export default function HomeScreen() {
   const [visibleModal, setVisibleModal] = useState(false);
@@ -35,18 +36,31 @@ export default function HomeScreen() {
     );
   };
 
-  const handleDelete = () => {
+  const handleBulkDelete = () => {
     setVisibleModal(false);
+
     deleteVideos.mutate(selectedIds, {
       onSuccess: () => {
         if (hapticsEnabled) {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         }
+
         setSelectionMode(false);
         setSelectedIds([]);
+
+        Toast.show({
+          type: 'success',
+          text1: selectedIds.length > 1 ? 'Videos deleted' : 'Video deleted',
+          visibilityTime: 2000,
+        });
       },
+
       onError: () => {
-        Alert.alert('Delete failed', 'Something went wrong. Please try again.');
+        Toast.show({
+          type: 'error',
+          text1: 'Videos could not be deleted.',
+          visibilityTime: 3500,
+        });
       },
     });
   };
@@ -176,7 +190,7 @@ export default function HomeScreen() {
           title="Delete videos?"
           description="Selected videos will be permanently removed."
           loading={deleteVideos.isPending}
-          onConfirm={handleDelete}
+          onConfirm={handleBulkDelete}
           confirmText="Delete"
           onCancel={() => setVisibleModal(false)}
         />
