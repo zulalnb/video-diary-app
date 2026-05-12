@@ -22,8 +22,16 @@ export const toastConfig = {
       </View>
     </View>
   ),
+  info: ({ text1 }: ToastConfigParams<any>) => (
+    <View className="mx-5 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3">
+      <View className="flex-row items-center gap-2">
+        <IconSymbol name="info.circle" size={18} color={colors.blue[600]} />
+        <AppText className="text-sm text-blue-700">{text1}</AppText>
+      </View>
+    </View>
+  ),
 };
 
 export function Toast() {
-  return <RNToast config={toastConfig} position="bottom" bottomOffset={40} />;
+  return <RNToast config={toastConfig} position="bottom" bottomOffset={60} />;
 }

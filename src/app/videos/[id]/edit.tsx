@@ -39,19 +39,14 @@ export default function VideoDetailScreen() {
     form.formState.isDirty && !updateVideo.isPending && !updateVideo.isSuccess,
     ({ data }) => {
       Keyboard.dismiss();
-      Alert.alert(
-        'Discard changes?',
-        'Your changes will be lost.',
-
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Discard',
-            style: 'destructive',
-            onPress: () => navigation.dispatch(data.action),
-          },
-        ]
-      );
+      Alert.alert('Discard changes?', 'Your changes will be lost.', [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Discard',
+          style: 'destructive',
+          onPress: () => navigation.dispatch(data.action),
+        },
+      ]);
     }
   );
 

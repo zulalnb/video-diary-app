@@ -56,7 +56,7 @@ export default function VideoDetailScreen() {
   const saveVideoToGallery = async (uri: string) => {
     try {
       if (Platform.OS === 'ios') {
-        const permission = await MediaLibrary.requestPermissionsAsync();
+        const permission = await MediaLibrary.requestPermissionsAsync(true);
 
         if (!permission.granted) {
           Alert.alert(
