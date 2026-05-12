@@ -9,7 +9,6 @@ import migrations from '@/drizzle/migrations';
 
 function DrizzleStudio() {
   const db = useSQLiteContext();
-
   useDrizzleStudio(db);
   return null;
 }
@@ -20,14 +19,14 @@ interface DatabaseProviderProps {
 
 export default function DatabaseProvider(props: DatabaseProviderProps) {
   const { success, error } = useMigrations(db, migrations);
-
+  const isDev = __DEV__;
   return (
     <Suspense fallback={<ActivityIndicator size="large" />}>
       <SQLiteProvider
         databaseName={DATABASE_NAME}
         options={{ enableChangeListener: true }}
         useSuspense>
-        {__DEV__ && <DrizzleStudio />}
+        {isDev && <DrizzleStudio />}
         {props.children}
       </SQLiteProvider>
     </Suspense>

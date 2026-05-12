@@ -102,7 +102,6 @@ export default function ModalScreen() {
         start: startTime,
         end: startTime + CLIP_DURATION,
       });
-
       const thumbnail = await generateThumbnail(trimmed.uri);
 
       const payload = {

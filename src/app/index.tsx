@@ -202,29 +202,29 @@ export default function HomeScreen() {
             </View>
           </View>
         )}
-        {selectionMode && (
-          <View className="absolute bottom-[calc(env(safe-area-inset-bottom)+6)] left-0 right-0 border-t border-gray-200 bg-white px-5 pt-3">
-            <View className="flex-row gap-3">
-              <View className="flex-1">
-                <Button
-                  icon={<IconSymbol name="checkmark.circle" color="#1f2937" size={18} />}
-                  title={allSelected ? 'Unselect All' : 'Select All'}
-                  variant="secondary"
-                  onPress={handleToggleSelectAll}
-                />
-              </View>
+      </AppView>
+      {selectionMode && (
+        <View className="absolute bottom-0 left-0 w-full border-t border-gray-200 bg-white px-5 pb-[calc(env(safe-area-inset-bottom)+6)] pt-3">
+          <View className="flex-row gap-3">
+            <View className="flex-1">
+              <Button
+                icon={<IconSymbol name="checkmark.circle" color="#1f2937" size={18} />}
+                title={allSelected ? 'Unselect All' : 'Select All'}
+                variant="secondary"
+                onPress={handleToggleSelectAll}
+              />
+            </View>
 
-              <View className="flex-1">
-                <Button
-                  title={`Delete (${selectedIds.length})`}
-                  variant="destructive"
-                  onPress={() => setVisibleModal(true)}
-                />
-              </View>
+            <View className="flex-1">
+              <Button
+                title={`Delete (${selectedIds.length})`}
+                variant="destructive"
+                onPress={() => setVisibleModal(true)}
+              />
             </View>
           </View>
-        )}
-      </AppView>
+        </View>
+      )}
     </>
   );
 }
