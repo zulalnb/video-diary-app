@@ -6,7 +6,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { Alert, Keyboard, Platform, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
-import { CLIP_DURATION, Step, STEPS } from '@/constants/video-flow';
+import { CLIP_DURATION, FALLBACK_THUMBNAIL, Step, STEPS } from '@/constants/video-flow';
 import { useCreateVideo, useTrimVideo } from '@/hooks/use-videos';
 import type { PickedVideoAsset } from '@/types/video';
 import { videoMetadataSchema, type VideoMetadataFormValues } from '@/validations/metadata';
@@ -97,16 +97,16 @@ export default function ModalScreen() {
     setIsSaving(true);
     setSaveErrorMessage(null);
     try {
+      const thumbnail = await generateThumbnail(video.uri, Math.floor(startTime * 1000));
       const trimmed = await trimVideo.mutateAsync({
         uri: video.uri,
         start: startTime,
         end: startTime + CLIP_DURATION,
       });
-      const thumbnail = await generateThumbnail(trimmed.uri);
 
       const payload = {
         uri: trimmed.uri,
-        thumbnail: thumbnail ?? '',
+        thumbnail: thumbnail ?? FALLBACK_THUMBNAIL,
         name: values.name,
         description: values.description ?? '',
       };

@@ -1,3 +1,5 @@
+import { Image } from 'react-native';
+
 export const CLIP_DURATION = 5;
 
 export const STEPS = {
@@ -7,3 +9,7 @@ export const STEPS = {
 } as const;
 
 export type Step = (typeof STEPS)[keyof typeof STEPS];
+
+export const FALLBACK_THUMBNAIL = Image.resolveAssetSource(
+  require('@/assets/images/thumbnail-placeholder.png')
+).uri;

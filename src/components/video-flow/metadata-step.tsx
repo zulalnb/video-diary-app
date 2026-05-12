@@ -18,7 +18,6 @@ export function MetadataStep({ video, startTime }: MetadataStepProps) {
     player.pause();
     player.timeUpdateEventInterval = 0.05;
   });
-
   useEventListener(player, 'timeUpdate', (event) => {
     const currentTime = event.currentTime;
 
