@@ -1,7 +1,8 @@
 import { format } from 'date-fns';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useEffect } from 'react';
-import { Image, Pressable, PressableProps, View } from 'react-native';
+import { memo, useEffect } from 'react';
+import { Pressable, PressableProps, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -21,7 +22,7 @@ type VideoCardProps = Pick<Video, 'name' | 'thumbnail'> &
     createdAt: string;
   };
 
-export function VideoCard({
+export const VideoCard = memo(function VideoCard({
   name,
   thumbnail,
   createdAt,
@@ -29,50 +30,49 @@ export function VideoCard({
   selectionMode = false,
   ...props
 }: VideoCardProps) {
+  const date = format(createdAt, 'MMMM dd, yyyy');
+
   return (
     <Pressable
-      className="relative h-56 overflow-hidden rounded-2xl shadow active:opacity-80"
+      className={cn(
+        'relative h-[210] overflow-hidden rounded-2xl border-2 active:opacity-80',
+        selected && selectionMode ? 'border-indigo-500' : 'border-white'
+      )}
       {...props}>
       <Image
-        source={{ uri: thumbnail }}
-        className="absolute inset-0 h-full w-full"
-        resizeMode="cover"
+        source={thumbnail}
+        className="absolute inset-0 aspect-video w-full"
+        contentFit="cover"
+        cachePolicy="memory-disk"
       />
+
+      {selectionMode && (
+        <View
+          className={cn(
+            'absolute left-3 top-3 h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-black/40',
+            selected && 'border-transparent bg-indigo-500'
+          )}>
+          {selected && <IconSymbol name="checkmark" size={18} color="white" />}
+        </View>
+      )}
+
+      {!selectionMode && (
+        <View className="absolute inset-0 items-center justify-center">
+          <View className="size-14 items-center justify-center rounded-full bg-slate-200/40">
+            <IconSymbol name="play.fill" size={32} color="white" />
+          </View>
+        </View>
+      )}
+
       <LinearGradient
         colors={['rgba(11,19,38,0)', 'rgba(11,19,38,0.9)']}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
-        className="absolute inset-0"
+        className="absolute inset-x-0 bottom-0 h-24"
       />
-      {selected && selectionMode && (
-        <View className="absolute inset-0 z-10 rounded-2xl border-2 border-indigo-500" />
-      )}
 
-      {/* selection overlay */}
-      {selectionMode && (
-        <View className="absolute inset-0 ">
-          <View
-            className={cn(
-              'absolute left-3 top-3 h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-black/40',
-              selected && 'border-transparent bg-indigo-500'
-            )}>
-            {selected && <IconSymbol name="checkmark" size={18} color="white" />}
-          </View>
-        </View>
-      )}
-
-      {/* play icon */}
-      {!selectionMode && (
-        <View className="absolute inset-0 items-center justify-center">
-          <View className="h-14 w-14 items-center justify-center rounded-full bg-slate-200/20">
-            <IconSymbol name="play.fill" size={40} color="white" />
-          </View>
-        </View>
-      )}
-
-      {/* bottom metadata overlay */}
       <View className="absolute bottom-0 left-0 right-0 px-4 py-3">
-        <AppText className="text-sm text-white/80">{format(createdAt, 'MMMM dd, yyyy')}</AppText>
+        <AppText className="text-sm text-white/80">{date}</AppText>
 
         <AppText className="mt-0.5 text-base font-semibold text-white" numberOfLines={1}>
           {name}
@@ -80,7 +80,7 @@ export function VideoCard({
       </View>
     </Pressable>
   );
-}
+});
 
 export function VideoCardSkeleton() {
   const opacity = useSharedValue(0.4);

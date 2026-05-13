@@ -1,4 +1,4 @@
-import { desc, eq, inArray } from 'drizzle-orm';
+import { count, desc, eq, inArray } from 'drizzle-orm';
 
 import { db } from '@/db/client';
 import { videos } from '@/db/schema';
@@ -156,4 +156,62 @@ export const deleteVideo = async (id: number) => {
 export const deleteVideos = async (ids: number[]) => {
   await simulateNetworkLatency();
   return db.delete(videos).where(inArray(videos.id, ids));
+};
+
+/**
+ * Retrieves a paginated list of videos from the database
+ *
+ * @remarks
+ * Videos are sorted by their last updated date in descending order.
+ * Network latency is simulated to emulate real-world API behavior.
+ *
+ * @param options - Pagination options
+ * @param options.page - Current page number (starts from 1)
+ * @param options.limit - Maximum number of videos to return per page
+ *
+ * @returns A promise that resolves to an array of video objects
+ *
+ * @example
+ * ```typescript
+ * const result = await getVideosPage({
+ *   page: 1,
+ *   limit: 20,
+ * });
+ *
+ * console.log(result);
+ * {[{ id: 1, name: 'My Birthday', ... }, ...], { pagination: { currentPage: 1, pageSize: 20, pageCount: 5, total: 92, next: 2, prev: null } }}
+ * ```
+ */
+export const getVideosPage = async ({
+  page = 1,
+  limit = 20,
+}: {
+  page?: number;
+  limit?: number;
+}) => {
+  await simulateNetworkLatency();
+
+  const safePage = Math.max(1, page);
+  const safeLimit = Math.max(1, limit);
+  const offset = (safePage - 1) * safeLimit;
+
+  const [data, totalCountResult] = await Promise.all([
+    db.select().from(videos).orderBy(desc(videos.created_at)).limit(safeLimit).offset(offset).all(),
+    db.select({ count: count() }).from(videos),
+  ]);
+
+  const totalCount = totalCountResult[0]?.count ?? 0;
+  const pageCount = Math.ceil(totalCount / safeLimit);
+
+  return {
+    data,
+    pagination: {
+      currentPage: page,
+      pageSize: limit,
+      pageCount,
+      total: totalCount,
+      next: page < pageCount ? page + 1 : null,
+      prev: page > 1 ? page - 1 : null,
+    },
+  };
 };

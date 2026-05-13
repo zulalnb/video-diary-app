@@ -5,9 +5,10 @@ import {
   deleteVideos,
   getAllVideos,
   getVideoById,
+  getVideosPage,
   updateVideo,
 } from '@/queries/videos';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { trimVideo } from 'expo-trim-video';
 
 export function useCreateVideo() {
@@ -22,9 +23,15 @@ export function useCreateVideo() {
 }
 
 export function useVideos() {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ['videos'],
-    queryFn: getAllVideos,
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) =>
+      getVideosPage({
+        page: pageParam,
+        limit: 20,
+      }),
+    getNextPageParam: (lastPage) => lastPage.pagination.next,
   });
 }
 

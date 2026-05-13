@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { Link, router, Stack } from 'expo-router';
-import { useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
@@ -16,14 +16,43 @@ import { Video } from '@/db/schema';
 import { useDeleteVideos, useVideos } from '@/hooks/use-videos';
 import { useSettingsStore } from '@/stores/settings-store';
 
+const ITEM_HEIGHT = 210;
+const SEPARATOR_HEIGHT = 20;
+
+const getItemLayout = (_data: ArrayLike<Video> | null | undefined, index: number) => ({
+  length: ITEM_HEIGHT + SEPARATOR_HEIGHT,
+  offset: (ITEM_HEIGHT + SEPARATOR_HEIGHT) * index,
+  index,
+});
+
+const ListFooter = memo(function ListFooter({ isLoading }: { isLoading: boolean }) {
+  if (!isLoading) return null;
+  return (
+    <View className="mt-5">
+      <ActivityIndicator size="small" />
+    </View>
+  );
+});
+
 export default function HomeScreen() {
   const [visibleModal, setVisibleModal] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
-
-  const { data: videos, isPending, isRefetching, error, refetch } = useVideos();
   const deleteVideos = useDeleteVideos();
   const { hapticsEnabled } = useSettingsStore();
+
+  const {
+    data,
+    isPending,
+    isRefetching,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useVideos();
+
+  const videos = data?.pages.flatMap((page) => page.data) ?? [];
 
   const hasVideos = !!videos && videos.length > 0;
   const allSelected = hasVideos && selectedIds.length === videos.length;
@@ -49,18 +78,6 @@ export default function HomeScreen() {
           onPress={() => router.push('/settings')}
         />
       ),
-  };
-
-  const triggerSelectionHaptic = async () => {
-    if (hapticsEnabled) {
-      await Haptics.selectionAsync();
-    }
-  };
-
-  const toggleSelect = (id: number) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((selectedId) => selectedId !== id) : [...prev, id]
-    );
   };
 
   const handleToggleSelectAll = () => {
@@ -103,23 +120,57 @@ export default function HomeScreen() {
     });
   };
 
-  const renderVideoCard = ({ item }: { item: Video }) => (
-    <VideoCard
-      name={item.name}
-      thumbnail={item.thumbnail}
-      createdAt={item.created_at}
-      selected={selectedIds.includes(item.id)}
-      selectionMode={selectionMode}
-      onLongPress={() => {
-        triggerSelectionHaptic();
-        setSelectionMode(true);
-        setSelectedIds([item.id]);
-      }}
-      onPress={() => {
-        if (selectionMode) toggleSelect(item.id);
-        else router.push(`/videos/${item.id}`);
-      }}
-    />
+  const handleSelectionMode = useCallback(
+    (id: number) => {
+      if (hapticsEnabled) {
+        Haptics.selectionAsync();
+      }
+
+      setSelectionMode(true);
+      setSelectedIds([id]);
+    },
+    [hapticsEnabled]
+  );
+
+  const handlePress = useCallback(
+    (id: number) => {
+      if (selectionMode) {
+        setSelectedIds((prev) =>
+          prev.includes(id) ? prev.filter((selectedId) => selectedId !== id) : [...prev, id]
+        );
+      } else {
+        router.push(`/videos/${id}`);
+      }
+    },
+    [selectionMode]
+  );
+
+  const handleEndReached = () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  };
+
+  const renderVideoCard = useCallback(
+    ({ item }: { item: Video }) => {
+      return (
+        <VideoCard
+          name={item.name}
+          thumbnail={item.thumbnail}
+          createdAt={item.created_at}
+          selected={selectedIds.includes(item.id)}
+          selectionMode={selectionMode}
+          onLongPress={() => handleSelectionMode(item.id)}
+          onPress={() => handlePress(item.id)}
+        />
+      );
+    },
+    [selectedIds, selectionMode, handleSelectionMode, handlePress]
+  );
+
+  const renderFooter = useCallback(
+    () => <ListFooter isLoading={isFetchingNextPage} />,
+    [isFetchingNextPage]
   );
 
   if (isPending) {
@@ -171,7 +222,7 @@ export default function HomeScreen() {
             No videos yet
           </AppText>
 
-          <AppText center className="mb-6 max-w-[280px] text-gray-500">
+          <AppText center className="mb-6 max-w-[280] text-gray-500">
             Add your first video to start creating memories.
           </AppText>
 
@@ -191,11 +242,20 @@ export default function HomeScreen() {
         <FlatList
           data={videos}
           keyExtractor={(item) => item.id.toString()}
-          contentContainerClassName="gap-6 pb-safe"
-          showsVerticalScrollIndicator={false}
           renderItem={renderVideoCard}
+          contentContainerClassName="pb-safe"
+          ItemSeparatorComponent={() => <View className="h-[20]" />}
+          getItemLayout={getItemLayout}
+          showsVerticalScrollIndicator={false}
           refreshing={isRefetching}
           onRefresh={refetch}
+          extraData={selectedIds}
+          initialNumToRender={6}
+          maxToRenderPerBatch={10}
+          windowSize={7}
+          onEndReachedThreshold={0.5}
+          onEndReached={handleEndReached}
+          ListFooterComponent={renderFooter}
         />
 
         {!selectionMode && (
