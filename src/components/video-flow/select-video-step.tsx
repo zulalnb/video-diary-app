@@ -24,7 +24,7 @@ export function SelectVideoStep({ video, onSelectVideo }: SelectVideoStepProps) 
   const pickVideo = async () => {
     try {
       setErrorMessage(null);
-
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['videos'],
         quality: 1,

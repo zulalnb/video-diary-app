@@ -10,6 +10,7 @@ import { CLIP_DURATION, FALLBACK_THUMBNAIL, Step, STEPS } from '@/constants/vide
 import { useCreateVideo, useTrimVideo } from '@/hooks/use-videos';
 import type { PickedVideoAsset } from '@/types/video';
 import { videoMetadataSchema, type VideoMetadataFormValues } from '@/validations/metadata';
+import Toast from 'react-native-toast-message';
 
 import { Alert as InlineAlert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,6 @@ import { MetadataStep } from '@/components/video-flow/metadata-step';
 import { SelectVideoStep } from '@/components/video-flow/select-video-step';
 import { TrimVideoStep } from '@/components/video-flow/trim-video-step';
 import { cn, generateThumbnail } from '@/lib/utils';
-import Toast from 'react-native-toast-message';
 
 export default function ModalScreen() {
   const [step, setStep] = useState<Step>(STEPS.SELECT);
@@ -110,13 +110,13 @@ export default function ModalScreen() {
         name: values.name,
         description: values.description ?? '',
       };
-      await createVideo.mutateAsync(payload);
+      const res = await createVideo.mutateAsync(payload);
       Toast.show({
         type: 'success',
         text1: 'Moment saved',
       });
 
-      router.dismissTo('/');
+      router.replace(`/videos/${res[0].id}`);
     } catch (error) {
       console.error('Video save failed:', error);
 

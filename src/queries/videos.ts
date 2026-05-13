@@ -79,7 +79,7 @@ export const createVideo = async (video: {
   description?: string;
 }) => {
   await simulateNetworkLatency();
-  return db.insert(videos).values(video).run();
+  return db.insert(videos).values(video).returning();
 };
 
 /**
