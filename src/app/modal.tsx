@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { usePreventRemove } from '@react-navigation/native';
 import { router, Stack, useNavigation } from 'expo-router';
 import { useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';

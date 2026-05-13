@@ -3,13 +3,59 @@ import {
   createVideo,
   deleteVideo,
   deleteVideos,
-  getAllVideos,
   getVideoById,
   getVideosPage,
   updateVideo,
 } from '@/queries/videos';
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  InfiniteData,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { trimVideo } from 'expo-trim-video';
+
+type VideosPage = Awaited<ReturnType<typeof getVideosPage>>;
+type VideosInfiniteData = InfiniteData<VideosPage, number>;
+
+function updateVideoInPages(
+  old: VideosInfiniteData | undefined,
+  id: number,
+  video: Partial<{ name: string; description?: string }>
+) {
+  if (!old) return old;
+
+  const updatedAt = new Date().toISOString();
+
+  return {
+    ...old,
+    pages: old.pages.map((page) => ({
+      ...page,
+      data: page.data.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              ...video,
+              updated_at: updatedAt,
+            }
+          : item
+      ),
+    })),
+  };
+}
+
+function removeVideosFromPages(old: VideosInfiniteData | undefined, ids: number[]) {
+  if (!old) return old;
+
+  return {
+    ...old,
+    pages: old.pages.map((page) => ({
+      ...page,
+      data: page.data.filter((video) => !ids.includes(video.id)),
+    })),
+  };
+}
 
 export function useCreateVideo() {
   const queryClient = useQueryClient();
@@ -65,19 +111,9 @@ export function useUpdateVideo() {
         };
       });
 
-      queryClient.setQueryData(['videos'], (old: Video[] | undefined) => {
-        if (!old) return old;
-
-        return old.map((item) =>
-          item.id === variables.id
-            ? {
-                ...item,
-                ...variables.video,
-                updated_at: new Date().toISOString(),
-              }
-            : item
-        );
-      });
+      queryClient.setQueryData<VideosInfiniteData>(['videos'], (old) =>
+        updateVideoInPages(old, variables.id, variables.video)
+      );
     },
   });
 }
@@ -91,12 +127,8 @@ export function useDeleteVideo() {
       await queryClient.cancelQueries({ queryKey: ['video', id] });
       await queryClient.cancelQueries({ queryKey: ['videos'] });
 
-      queryClient.setQueryData(
-        ['videos'],
-        (old: Awaited<ReturnType<typeof getAllVideos>> | undefined) => {
-          if (!old) return old;
-          return old.filter((video) => video.id !== id);
-        }
+      queryClient.setQueryData<VideosInfiniteData>(['videos'], (old) =>
+        removeVideosFromPages(old, [id])
       );
 
       queryClient.removeQueries({ queryKey: ['video', id] });
@@ -112,12 +144,8 @@ export function useDeleteVideos() {
     onSuccess: async (_, ids) => {
       await queryClient.cancelQueries({ queryKey: ['videos'] });
 
-      queryClient.setQueryData(
-        ['videos'],
-        (old: Awaited<ReturnType<typeof getAllVideos>> | undefined) => {
-          if (!old) return old;
-          return old.filter((video) => !ids.includes(video.id));
-        }
+      queryClient.setQueryData<VideosInfiniteData>(['videos'], (old) =>
+        removeVideosFromPages(old, ids)
       );
     },
   });
