@@ -1,5 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { VideoPlayer } from '@/components/video-player';
 import { CLIP_DURATION } from '@/constants/video-flow';
-import { compressVideoIfNeeded } from '@/lib/video-compression';
+import { cancelVideoCompression, compressVideoIfNeeded } from '@/lib/video-compression';
 import type { PickedVideoAsset } from '@/types/video';
 import colors from 'tailwindcss/colors';
 
@@ -19,11 +19,22 @@ type SelectVideoStepProps = {
 
 export function SelectVideoStep({ video, onSelectVideo }: SelectVideoStepProps) {
   const [isPreparing, setIsPreparing] = useState(false);
+  const [isCancellingCompression, setIsCancellingCompression] = useState(false);
+  const [compressionProgress, setCompressionProgress] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const compressionCancellationIdRef = useRef<string | null>(null);
+  const wasCompressionCancelledRef = useRef(false);
+
+  const compressionPercent =
+    compressionProgress === null ? null : Math.round(compressionProgress * 100);
 
   const pickVideo = async () => {
     try {
       setErrorMessage(null);
+      setCompressionProgress(null);
+      setIsCancellingCompression(false);
+      compressionCancellationIdRef.current = null;
+      wasCompressionCancelledRef.current = false;
       await ImagePicker.requestMediaLibraryPermissionsAsync();
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['videos'],
@@ -51,23 +62,46 @@ export function SelectVideoStep({ video, onSelectVideo }: SelectVideoStepProps) 
       const compressedUri = await compressVideoIfNeeded({
         uri: pickedVideo.uri,
         fileSize: pickedVideo.fileSize,
+        onProgress: (progress) => {
+          setCompressionProgress(Math.max(0, Math.min(progress, 1)));
+        },
+        onCancellationId: (cancellationId) => {
+          compressionCancellationIdRef.current = cancellationId;
+        },
       });
+
+      if (wasCompressionCancelledRef.current) return;
 
       onSelectVideo({
         ...pickedVideo,
         uri: compressedUri,
       });
     } catch (error) {
+      if (wasCompressionCancelledRef.current) return;
+
       console.error('Failed to prepare video:', error);
 
       setErrorMessage('The video could not be prepared. Please try another video.');
     } finally {
       setIsPreparing(false);
+      setIsCancellingCompression(false);
+      setCompressionProgress(null);
+      compressionCancellationIdRef.current = null;
+      wasCompressionCancelledRef.current = false;
+    }
+  };
+
+  const handleCancelCompression = () => {
+    wasCompressionCancelledRef.current = true;
+    setIsCancellingCompression(true);
+
+    if (compressionCancellationIdRef.current) {
+      cancelVideoCompression(compressionCancellationIdRef.current);
     }
   };
 
   return (
-    <View className="flex-1">
+    <View className="relative flex-1">
       {video ? (
         <View>
           <VideoPlayer uri={video.uri} />
@@ -78,6 +112,7 @@ export function SelectVideoStep({ video, onSelectVideo }: SelectVideoStepProps) 
               variant="secondary"
               onPress={pickVideo}
               className="mt-5 flex-1"
+              disabled={isPreparing}
             />
 
             <Button
@@ -85,29 +120,53 @@ export function SelectVideoStep({ video, onSelectVideo }: SelectVideoStepProps) 
               variant="destructive"
               onPress={() => onSelectVideo(null)}
               className="mt-5 flex-1"
+              disabled={isPreparing}
             />
           </View>
         </View>
       ) : (
         <Pressable onPress={pickVideo} disabled={isPreparing}>
-          <View className="relative aspect-video items-center justify-center rounded-xl border border-dashed border-gray-400 px-5 py-14">
+          <View className="aspect-video items-center justify-center rounded-xl border border-dashed border-gray-400 px-5 py-14">
             <IconSymbol name="arrow.up.doc" size={48} color={colors.gray[400]} className="mb-2" />
 
             <AppText center className="w-9/12 text-gray-400">
               Pick a video longer than 5 seconds. You’ll select a 5-second moment next.
             </AppText>
-
-            {isPreparing && (
-              <View className="absolute inset-0 items-center justify-center rounded-xl bg-white/80">
-                <ActivityIndicator />
-
-                <AppText center className="mt-3 text-sm text-gray-500">
-                  Preparing video...
-                </AppText>
-              </View>
-            )}
           </View>
         </Pressable>
+      )}
+
+      {isPreparing && (
+        <View className="absolute inset-0 z-10 items-center justify-center rounded-xl bg-white/80">
+          <ActivityIndicator />
+
+          <AppText center className="mt-3 text-sm text-gray-500">
+            {isCancellingCompression
+              ? 'Cancelling compression...'
+              : compressionPercent === null
+                ? 'Preparing video...'
+                : `Compressing video... ${compressionPercent}%`}
+          </AppText>
+
+          {compressionPercent !== null && (
+            <View className="mt-4 h-2 w-8/12 overflow-hidden rounded-full bg-gray-200">
+              <View
+                className="h-full rounded-full bg-indigo-500"
+                style={{ width: `${compressionPercent}%` }}
+              />
+            </View>
+          )}
+
+          {compressionPercent !== null && (
+            <Button
+              title="Cancel"
+              variant="secondary"
+              onPress={handleCancelCompression}
+              disabled={isCancellingCompression}
+              className="mt-5 min-w-32"
+            />
+          )}
+        </View>
       )}
 
       <AppText center className="mt-2 text-sm text-gray-600">

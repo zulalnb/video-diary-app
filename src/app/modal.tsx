@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { usePreventRemove } from '@react-navigation/native';
 import { router, Stack, useNavigation } from 'expo-router';
 import { useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -40,7 +39,7 @@ export default function ModalScreen() {
 
   const navigation = useNavigation();
 
-  const shouldPreventClose = form.formState.isDirty && !isSaving && !createVideo.isSuccess;
+  const shouldPreventClose = form.formState.isDirty && !isSaving;
 
   usePreventRemove(shouldPreventClose, ({ data }) => {
     Keyboard.dismiss();
@@ -113,7 +112,7 @@ export default function ModalScreen() {
       const res = await createVideo.mutateAsync(payload);
       Toast.show({
         type: 'success',
-        text1: 'Moment saved',
+        text1: 'Moment saved.',
       });
 
       router.replace(`/videos/${res[0].id}`);
