@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { VideoDetailSkeleton } from '@/components/video-detail-skeleton';
 import { VideoPlayer } from '@/components/video-player';
+import { useIsScreenActiveRef } from '@/hooks/use-is-screen-active';
 import { useDeleteVideo, useVideoById } from '@/hooks/use-videos';
 import { useSettingsStore } from '@/stores/settings-store';
 import colors from 'tailwindcss/colors';
@@ -27,11 +28,14 @@ export default function VideoDetailScreen() {
   const { data: video, isPending, error } = useVideoById(videoId);
   const deleteVideo = useDeleteVideo();
   const { hapticsEnabled } = useSettingsStore();
+  const isScreenActiveRef = useIsScreenActiveRef();
 
   const handleDelete = () => {
     setVisibleModal(false);
     deleteVideo.mutate(videoId, {
       onSuccess: () => {
+        if (!isScreenActiveRef.current) return;
+
         if (hapticsEnabled) {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         }
@@ -43,6 +47,8 @@ export default function VideoDetailScreen() {
         });
       },
       onError: () => {
+        if (!isScreenActiveRef.current) return;
+
         Toast.show({
           type: 'error',
           text1: 'Video could not be deleted.',

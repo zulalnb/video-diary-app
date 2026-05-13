@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { VideoDetailSkeleton } from '@/components/video-detail-skeleton';
 import { VideoPlayer } from '@/components/video-player';
+import { useIsScreenActiveRef } from '@/hooks/use-is-screen-active';
 import { useUpdateVideo, useVideoById } from '@/hooks/use-videos';
 import { VideoMetadataFormValues, videoMetadataSchema } from '@/validations/metadata';
 import Toast from 'react-native-toast-message';
@@ -23,6 +24,7 @@ export default function VideoDetailScreen() {
   const { data: video, isPending, error } = useVideoById(videoId);
   const updateVideo = useUpdateVideo();
   const navigation = useNavigation();
+  const isScreenActiveRef = useIsScreenActiveRef();
 
   const form = useForm<VideoMetadataFormValues>({
     resolver: zodResolver(videoMetadataSchema),
@@ -62,9 +64,12 @@ export default function VideoDetailScreen() {
             text1: 'Your changes saved.',
             visibilityTime: 2000,
           });
+          if (!isScreenActiveRef.current) return;
           router.back();
         },
         onError: () => {
+          if (!isScreenActiveRef.current) return;
+
           Toast.show({
             type: 'error',
             text1: 'Your changes could not be saved.',

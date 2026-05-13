@@ -7,6 +7,7 @@ import { Alert, Keyboard, Platform, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
 import { CLIP_DURATION, FALLBACK_THUMBNAIL, Step, STEPS } from '@/constants/video-flow';
+import { useIsScreenActiveRef } from '@/hooks/use-is-screen-active';
 import { useCreateVideo, useTrimVideo } from '@/hooks/use-videos';
 import type { PickedVideoAsset } from '@/types/video';
 import { videoMetadataSchema, type VideoMetadataFormValues } from '@/validations/metadata';
@@ -29,6 +30,7 @@ export default function ModalScreen() {
 
   const trimVideo = useTrimVideo();
   const createVideo = useCreateVideo();
+  const isScreenActiveRef = useIsScreenActiveRef();
 
   const form = useForm<VideoMetadataFormValues>({
     resolver: zodResolver(videoMetadataSchema),
@@ -116,13 +118,19 @@ export default function ModalScreen() {
         text1: 'Moment saved.',
       });
 
+      if (!isScreenActiveRef.current) return;
+
       router.replace(`/videos/${res[0].id}`);
     } catch (error) {
+      if (!isScreenActiveRef.current) return;
+
       console.error('Video save failed:', error);
 
       setSaveErrorMessage('Your video could not be saved. Please try again.');
     } finally {
-      setIsSaving(false);
+      if (isScreenActiveRef.current) {
+        setIsSaving(false);
+      }
     }
   };
 
