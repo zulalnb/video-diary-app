@@ -57,7 +57,7 @@ function VideoPlayerView({
     if (isPlaying) {
       player.pause();
     } else {
-      if (typeof playFrom === 'number') {
+      if (typeof playFrom === 'number' && player.currentTime < playFrom) {
         player.currentTime = playFrom;
       }
 

@@ -1,4 +1,5 @@
 import * as Device from 'expo-device';
+import { Platform } from 'react-native';
 import { Video as VideoCompressor } from 'react-native-compressor';
 
 const LARGE_VIDEO_LIMIT = 30 * 1024 * 1024; // 30MB
@@ -14,7 +15,8 @@ export async function compressVideoIfNeeded({
   onProgress?: (progress: number) => void;
   onCancellationId?: (cancellationId: string) => void;
 }) {
-  const shouldCompress = Device.isDevice && !!fileSize && fileSize > LARGE_VIDEO_LIMIT;
+  const shouldCompress =
+    Device.isDevice && Platform.OS === 'android' && !!fileSize && fileSize > LARGE_VIDEO_LIMIT;
   if (!shouldCompress) {
     return uri;
   }

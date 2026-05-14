@@ -9,44 +9,43 @@ import { AppText } from './app-text';
 
 const groupCount = 5;
 const TICK_COUNT = groupCount * 5 + 1;
+const MIN_RANGE_WIDTH = 48;
 
 type ScrubberProps = {
   startTime?: number;
-  previewStartTime?: number;
   duration?: number;
   videoDuration: number;
   onChange: (value: number) => void;
-  onPreviewChange?: (value: number) => void;
 };
 
 export function Scrubber({
   startTime = 0,
-  previewStartTime = 0,
   duration = CLIP_DURATION,
   videoDuration,
   onChange,
-  onPreviewChange,
 }: ScrubberProps) {
   const [scrubberWidth, setScrubberWidth] = useState(0);
   const scale = useSharedValue(1);
 
   const safeDuration = Math.min(duration, videoDuration);
   const maxStartTime = Math.max(0, videoDuration - safeDuration);
-
   const safeStartTime = Math.max(0, Math.min(startTime, maxStartTime));
 
-  const rangeWidth = videoDuration > 0 ? scrubberWidth * (safeDuration / videoDuration) : 0;
+  const rawRangeWidth = videoDuration > 0 ? scrubberWidth * (safeDuration / videoDuration) : 0;
+
+  const rangeWidth =
+    scrubberWidth > 0 ? Math.min(scrubberWidth, Math.max(rawRangeWidth, MIN_RANGE_WIDTH)) : 0;
 
   const initialStartX = videoDuration > 0 ? scrubberWidth * (safeStartTime / videoDuration) : 0;
 
   const startX = useSharedValue(0);
   const gestureStartX = useSharedValue(0);
 
-  useEffect(() => {
-    startX.value = initialStartX;
-  }, [initialStartX]);
-
   const maxStartX = Math.max(0, scrubberWidth - rangeWidth);
+
+  useEffect(() => {
+    startX.value = Math.max(0, Math.min(initialStartX, maxStartX));
+  }, [initialStartX, maxStartX]);
 
   const panGesture = Gesture.Pan()
     .onBegin(() => {
@@ -61,12 +60,11 @@ export function Scrubber({
       const nextStartTime =
         scrubberWidth > 0 && videoDuration > 0 ? (startX.value / scrubberWidth) * videoDuration : 0;
 
-      if (onPreviewChange) {
-        scheduleOnRN(onPreviewChange, nextStartTime);
-      }
+      scheduleOnRN(onChange, nextStartTime);
     })
     .onEnd(() => {
       scale.value = withTiming(1, { duration: 120 });
+
       const nextStartTime =
         scrubberWidth > 0 && videoDuration > 0 ? (startX.value / scrubberWidth) * videoDuration : 0;
 
@@ -87,11 +85,12 @@ export function Scrubber({
       </AppText>
 
       <View className="mb-3 flex-row items-center justify-between">
-        <AppText className="text-sm text-gray-500">Start: {previewStartTime.toFixed(1)}s</AppText>
+        <AppText className="text-sm text-gray-500">Start: {startTime.toFixed(1)}s</AppText>
         <AppText className="text-sm text-gray-500">
-          End: {(previewStartTime + duration).toFixed(1)}s
+          End: {(startTime + duration).toFixed(1)}s
         </AppText>
       </View>
+
       <View
         className="relative h-12 justify-center"
         onLayout={(event) => {

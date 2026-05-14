@@ -95,11 +95,15 @@ export default function ModalScreen() {
 
   const handleSave = async (values: VideoMetadataFormValues) => {
     Keyboard.dismiss();
+
     if (!video) return;
+
     setIsSaving(true);
     setSaveErrorMessage(null);
+
     try {
       const thumbnail = await generateThumbnail(video.uri, Math.floor(startTime * 1000));
+
       const trimmed = await trimVideo.mutateAsync({
         uri: video.uri,
         start: startTime,
@@ -112,20 +116,27 @@ export default function ModalScreen() {
         name: values.name,
         description: values.description ?? '',
       };
+
       const res = await createVideo.mutateAsync(payload);
+
+      if (!isScreenActiveRef.current) return;
+
+      form.reset(values);
+
       Toast.show({
         type: 'success',
         text1: 'Moment saved.',
       });
 
-      if (!isScreenActiveRef.current) return;
-
-      router.replace(`/videos/${res[0].id}`);
+      requestAnimationFrame(() => {
+        if (isScreenActiveRef.current) {
+          router.replace(`/videos/${res[0].id}`);
+        }
+      });
     } catch (error) {
       if (!isScreenActiveRef.current) return;
 
       console.error('Video save failed:', error);
-
       setSaveErrorMessage('Your video could not be saved. Please try again.');
     } finally {
       if (isScreenActiveRef.current) {
@@ -147,7 +158,6 @@ export default function ModalScreen() {
           headerLeft: () =>
             Platform.OS === 'android' ? (
               <Button
-                disabled={isSaving}
                 variant="ghost"
                 onPress={() => router.dismissTo('/')}
                 icon={<IconSymbol name="xmark" color="black" size={24} />}

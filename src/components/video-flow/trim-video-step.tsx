@@ -1,6 +1,5 @@
 import { useEventListener } from 'expo';
 import { useVideoPlayer } from 'expo-video';
-import { useState } from 'react';
 import { View } from 'react-native';
 
 import { Scrubber } from '@/components/scrubber';
@@ -17,11 +16,10 @@ type TrimVideoStepProps = {
 
 export function TrimVideoStep({ video, startTime, onChangeStartTime }: TrimVideoStepProps) {
   const durationInSeconds = video.duration ? video.duration / 1000 : 0;
-  const [previewStartTime, setPreviewStartTime] = useState(startTime);
 
   const player = useVideoPlayer(video.uri, (player) => {
     player.currentTime = startTime;
-    player.loop = false;
+    player.loop = true;
     player.pause();
     player.timeUpdateEventInterval = 0.05;
   });
@@ -30,13 +28,13 @@ export function TrimVideoStep({ video, startTime, onChangeStartTime }: TrimVideo
     const currentTime = event.currentTime;
 
     if (currentTime >= startTime + CLIP_DURATION) {
-      // player.currentTime = startTime;
-      player.pause();
+      player.currentTime = startTime;
     }
   });
 
   const throttledPreviewChange = useThrottle((value: number) => {
-    setPreviewStartTime(value);
+    onChangeStartTime(value);
+    player.currentTime = value;
   }, 100);
 
   return (
@@ -53,13 +51,7 @@ export function TrimVideoStep({ video, startTime, onChangeStartTime }: TrimVideo
       <Scrubber
         videoDuration={durationInSeconds}
         startTime={startTime}
-        previewStartTime={previewStartTime}
-        onPreviewChange={throttledPreviewChange}
-        onChange={(value) => {
-          onChangeStartTime(value);
-          setPreviewStartTime(value);
-          player.currentTime = value;
-        }}
+        onChange={throttledPreviewChange}
       />
     </View>
   );
