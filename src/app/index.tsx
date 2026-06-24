@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { Link, router, Stack } from 'expo-router';
 import { memo, useCallback, useState } from 'react';
-import { ActivityIndicator, FlatList, View } from 'react-native';
+import { ActivityIndicator, FlatList, ListRenderItem, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 import { AppText } from '@/components/app-text';
@@ -151,8 +151,8 @@ export default function HomeScreen() {
     }
   };
 
-  const renderVideoCard = useCallback(
-    ({ item }: { item: Video }) => {
+  const renderVideoCard: ListRenderItem<Video> = useCallback(
+    ({ item }) => {
       return (
         <VideoCard
           name={item.name}

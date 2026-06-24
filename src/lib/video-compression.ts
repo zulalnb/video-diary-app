@@ -17,9 +17,11 @@ export async function compressVideoIfNeeded({
 }) {
   const shouldCompress =
     Device.isDevice && Platform.OS === 'android' && !!fileSize && fileSize > LARGE_VIDEO_LIMIT;
+
   if (!shouldCompress) {
     return uri;
   }
+
   return VideoCompressor.compress(
     uri,
     {

@@ -5,6 +5,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { scheduleOnRN } from 'react-native-worklets';
 
 import { CLIP_DURATION } from '@/constants/video-flow';
+import { formatTime } from '@/lib/utils';
 import { AppText } from './app-text';
 
 const groupCount = 5;
@@ -85,9 +86,9 @@ export function Scrubber({
       </AppText>
 
       <View className="mb-3 flex-row items-center justify-between">
-        <AppText className="text-sm text-gray-500">Start: {startTime.toFixed(1)}s</AppText>
+        <AppText className="text-sm text-gray-500">Start: {formatTime(startTime)}s</AppText>
         <AppText className="text-sm text-gray-500">
-          End: {(startTime + duration).toFixed(1)}s
+          End: {formatTime(startTime + duration)}s
         </AppText>
       </View>
 

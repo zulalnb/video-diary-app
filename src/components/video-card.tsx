@@ -68,16 +68,12 @@ export const VideoCard = memo(function VideoCard({
         colors={['rgba(11,19,38,0)', 'rgba(11,19,38,0.9)']}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
-        className="absolute inset-x-0 bottom-0 h-24"
-      />
-
-      <View className="absolute bottom-0 left-0 right-0 px-4 py-3">
+        className="absolute bottom-0 left-0 right-0 px-4 py-3">
         <AppText className="text-sm text-white/80">{date}</AppText>
-
         <AppText className="mt-0.5 text-base font-semibold text-white" numberOfLines={1}>
           {name}
         </AppText>
-      </View>
+      </LinearGradient>
     </Pressable>
   );
 });

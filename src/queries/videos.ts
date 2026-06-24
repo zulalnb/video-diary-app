@@ -155,7 +155,7 @@ export const deleteVideo = async (id: number) => {
  */
 export const deleteVideos = async (ids: number[]) => {
   await simulateNetworkLatency();
-  return db.delete(videos).where(inArray(videos.id, ids));
+  return db.delete(videos).where(inArray(videos.id, ids)).run();
 };
 
 /**
@@ -206,8 +206,8 @@ export const getVideosPage = async ({
   return {
     data,
     pagination: {
-      currentPage: page,
-      pageSize: limit,
+      currentPage: safePage,
+      pageSize: safeLimit,
       pageCount,
       total: totalCount,
       next: page < pageCount ? page + 1 : null,

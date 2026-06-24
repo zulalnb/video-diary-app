@@ -4,6 +4,7 @@ import { router, Stack, useLocalSearchParams, useNavigation } from 'expo-router'
 import { FormProvider, useForm } from 'react-hook-form';
 import { Alert, Keyboard, View } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
+import Toast from 'react-native-toast-message';
 
 import { AppText } from '@/components/app-text';
 import { AppView } from '@/components/app-view';
@@ -15,7 +16,6 @@ import { VideoPlayer } from '@/components/video-player';
 import { useIsScreenActiveRef } from '@/hooks/use-is-screen-active';
 import { useUpdateVideo, useVideoById } from '@/hooks/use-videos';
 import { VideoMetadataFormValues, videoMetadataSchema } from '@/validations/metadata';
-import Toast from 'react-native-toast-message';
 
 export default function VideoDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
